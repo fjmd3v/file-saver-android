@@ -1,0 +1,81 @@
+# .github/workflows/build-apk-debug.yml
+name: Build Android APK (Debug)
+
+on:
+  workflow_dispatch:
+# push:
+  # branches:
+    # - '**'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04
+
+    env:
+      APP_NAME: ${{ github.event.repository.name }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - uses: gradle/actions/setup-gradle@v6
+        # with
+        # gradle-version: '8.13'
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+        
+      - name: Build with Gradle
+      # run: ./gradlew build
+      # run: ./gradlew clean &&
+        run: ./gradlew assembleDebug
+
+      - name: Rename Debug APK
+        run: |
+          mv app/build/outputs/apk/debug/app-debug.apk \
+             app/build/outputs/apk/debug/${APP_NAME}-debug-${{ github.run_number }}.apk
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.APP_NAME }}-debug-${{ github.run_number }}.apk
+          path: app/build/outputs/apk/debug/${{ env.APP_NAME }}-debug-${{ github.run_number }}.apk
+          retention-days: 90
+          archive: false
+
+      - name: PushOver Notification - Success
+        if: success()
+        env:
+          PUSHOVER_KEY: ${{ secrets.PUSHOVER_KEY }}
+          PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+        run: |
+          curl -s \
+            --form-string "token=${PUSHOVER_KEY}" \
+            --form-string "user=${PUSHOVER_USER_KEY}" \
+            --form-string "title=✅ RUN SUCCESSFUL" \
+            --form-string "message=${{ github.repository }} - ${APP_NAME}-debug-${{ github.run_number }}.apk built successfully." \
+            --form-string "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --form-string "url_title=View GitHub Actions Job" \
+            https://api.pushover.net/1/messages.json
+
+      - name: PushOver Notification - Failure
+        if: failure()
+        env:
+          PUSHOVER_KEY: ${{ secrets.PUSHOVER_KEY }}
+          PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+        run: |
+          curl -s \
+            --form-string "token=${PUSHOVER_KEY}" \
+            --form-string "user=${PUSHOVER_USER_KEY}" \
+            --form-string "title=❌ RUN FAILED" \
+            --form-string "message=${{ github.repository }} - Debug APK build #${{ github.run_number }} failed." \
+            --form-string "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --form-string "url_title=View GitHub Actions Job" \
+            https://api.pushover.net/1/messages.json
+            
