@@ -2,55 +2,60 @@ package link.standen.michael.phonesaver.activity
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.DataSetObserver
 import android.os.Build
+import android.view.MenuItem
 import android.view.View
-import android.widget.ListView
-import de.cketti.library.changelog.ChangeLog
+import androidx.recyclerview.widget.RecyclerView
 import link.standen.michael.phonesaver.R
-import link.standen.michael.phonesaver.adapter.DeletableLocationArrayAdapter
+import link.standen.michael.phonesaver.ui.CardItem
+import link.standen.michael.phonesaver.ui.CardListAdapter
+import link.standen.michael.phonesaver.ui.MiuixListFragment
+import link.standen.michael.phonesaver.util.ChangeLogHelper
 import link.standen.michael.phonesaver.util.DebugLogger
-import link.standen.michael.phonesaver.util.LocationHelper
-import link.standen.michael.phonesaver.data.LocationWithData
 import link.standen.michael.phonesaver.util.DialogHelper
+import link.standen.michael.phonesaver.util.DirectShareHelper
+import link.standen.michael.phonesaver.util.LocationHelper
 import link.standen.michael.phonesaver.util.PreferenceHelper
+import java.io.File
+import java.util.Locale
 
 /**
  * The entry point activity.
  * This activity shows the list of user selected folders.
  */
-class FolderListActivity : ListActivity() {
+class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 
 	companion object {
 		const val FOLDER_SELECT_REQUEST_CODE = 1
 		const val PERMISSION_REQUEST_CODE = 2
 
-		const val CHANGE_LOG_CSS = """
-				body { padding: 0.8em; }
-				h1 { margin-left: 0px; font-size: 1.2em; }
-				ul { padding-left: 1.2em; }
-				li { margin-left: 0px; }
-			"""
+		private const val KEY_LOCATION_SELECT = "location_select"
 	}
 
 	private lateinit var log: DebugLogger
 
-	private lateinit var adapter: DeletableLocationArrayAdapter
 	private val folderList: MutableList<String> = ArrayList()
 
 	private val preferenceHelper = PreferenceHelper(this)
 
+	private val adapter = CardListAdapter(
+		onRowAction = { row, _ -> confirmDelete(row.key) },
+		onMessageAction = { openFolderSelect() },
+	)
+
+	private lateinit var fab: View
+
 	override fun onCreate(savedInstanceState: android.os.Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.folder_list_activity)
-		val toolbar = findViewById<android.support.v7.widget.Toolbar>(R.id.toolbar)
-		setSupportActionBar(toolbar)
 
-		val fab = findViewById<android.support.design.widget.FloatingActionButton>(R.id.fab)
-		fab.setOnClickListener {
-			val intent = Intent(this@FolderListActivity, FolderSelectActivity::class.java)
-			this@FolderListActivity.startActivityForResult(intent, FOLDER_SELECT_REQUEST_CODE)
-		}
+		val appBar = setUpAppBar(getString(R.string.app_name), showUp = false)
+		appBar.toolbar.inflateMenu(R.menu.folder_list_menu)
+		appBar.toolbar.setOnMenuItemClickListener { onOptionsItemSelected(it) }
+
+		fab = findViewById(R.id.fab)
+		fab.setOnClickListener { openFolderSelect() }
+		applyBottomInset(fab, asMargin = true)
 
 		log = DebugLogger(this)
 
@@ -64,69 +69,32 @@ class FolderListActivity : ListActivity() {
 		}
 
 		// Show the change log over top of thanks
-		showChangeLog(false)
+		ChangeLogHelper.show(this, false)
 
-		// Call to load lists
-		onResume()
+		// Keep Direct Share targets in sync for users upgrading from older versions
+		DirectShareHelper.publish(this, LocationHelper.loadFolderList(this).orEmpty())
+	}
+
+	override fun onListViewCreated(recyclerView: RecyclerView) {
+		recyclerView.adapter = adapter
 	}
 
 	override fun onResume() {
 		super.onResume()
 
-		// Init list view
-		val locationsWithData = folderList.map {
-			LocationWithData(it)
-		}.toMutableList()
-
 		preferenceHelper.loadPreferences()
-
-		if (PreferenceHelper.locationSelectEnabled){
-			// Add select location to list view
-			locationsWithData.add(0, LocationWithData(resources.getString(R.string.location_select_label), false))
-		}
-
-		adapter = DeletableLocationArrayAdapter(this, R.layout.folder_list_item, locationsWithData)
-		adapter.registerDataSetObserver(object: DataSetObserver() {
-			override fun onChanged() {
-				// Reload the list
-				loadFolderList()
-				checkEmptyFolderList()
-			}
-		})
-		findViewById<ListView>(android.R.id.list).adapter = adapter
 
 		// Init list items
 		loadFolderList()
 	}
 
-	/**
-	 * Show the change log.
-	 * Shows the full change log when nothing is in "What's New" log. Shows "What's New" log otherwise.
-	 * @param force Force the change log to be displayed, if false only displayed if new content.
-	 */
-	private fun showChangeLog(force: Boolean) {
-		val cl = ChangeLog(this, CHANGE_LOG_CSS)
-		if (force || cl.isFirstRun) {
-			if (cl.getChangeLog(false).size == 0){
-				// Force the display of the full dialog list.
-				cl.fullLogDialog.show()
-			} else {
-				// Show only the new stuff.
-				cl.logDialog.show()
-			}
-		}
+	private fun openFolderSelect() {
+		val intent = Intent(this@FolderListActivity, FolderSelectActivity::class.java)
+		@Suppress("DEPRECATION")
+		this@FolderListActivity.startActivityForResult(intent, FOLDER_SELECT_REQUEST_CODE)
 	}
 
-	override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		menuInflater.inflate(R.menu.folder_list_menu, menu)
-		return true
-	}
-
-	override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean =
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
+	override fun onOptionsItemSelected(item: MenuItem): Boolean =
 		when (item.itemId) {
 			R.id.action_credits -> {
 				startActivity(Intent(this, CreditsActivity::class.java))
@@ -141,27 +109,30 @@ class FolderListActivity : ListActivity() {
 				true
 			}
 			R.id.action_change_log -> {
-				showChangeLog(true)
+				ChangeLogHelper.show(this, true)
 				true
 			}
 			else ->
 				super.onOptionsItemSelected(item)
 		}
 
+	@Deprecated("Deprecated in Java")
 	public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		@Suppress("DEPRECATION")
 		super.onActivityResult(requestCode, resultCode, data)
 		if (data == null){
 			return
 		}
 		if (resultCode == RESULT_OK) {
-			if (requestCode == 1) {
-				val folder = LocationHelper.removeRoot(data.getStringExtra(FolderSelectActivity.FOLDER_SELECTED))
+			if (requestCode == FOLDER_SELECT_REQUEST_CODE) {
+				val selected = data.getStringExtra(FolderSelectActivity.FOLDER_SELECTED) ?: return
+				val folder = LocationHelper.removeRoot(selected)
 				// Don't add duplicates
 				if (!folderList.contains(folder)) {
 					folderList.add(folder)
-					folderList.sortBy { it.toLowerCase() }
+					folderList.sortBy { it.lowercase(Locale.getDefault()) }
 					LocationHelper.saveFolderList(this, folderList)
-					adapter.notifyDataSetChanged()
+					showFolderList()
 				}
 			}
 		}
@@ -176,19 +147,69 @@ class FolderListActivity : ListActivity() {
 		LocationHelper.loadFolderList(this)?.let {
 			folderList.addAll(it)
 		}
-		checkEmptyFolderList()
+		showFolderList()
 	}
 
 	/**
-	 * Shows or hides the empty list layout as required.
+	 * Shows the destinations, or the empty state when there is nothing to show.
 	 */
-	fun checkEmptyFolderList() {
+	private fun showFolderList() {
 		if (!PreferenceHelper.locationSelectEnabled && folderList.isEmpty()) {
-			findViewById<View>(android.R.id.empty).visibility = View.VISIBLE
-			findViewById<View>(android.R.id.list).visibility = View.GONE
-		} else {
-			findViewById<View>(android.R.id.empty).visibility = View.GONE
-			findViewById<View>(android.R.id.list).visibility = View.VISIBLE
+			adapter.items = listOf(CardItem.Message(
+				icon = R.drawable.fs_ic_folder_add,
+				title = getString(R.string.folder_list_empty_title),
+				body = getString(R.string.folder_list_empty_body),
+				actionText = getString(R.string.folder_list_add_destination),
+			))
+			// The empty state has its own add button
+			fab.visibility = View.GONE
+			return
+		}
+
+		fab.visibility = View.VISIBLE
+		val items = mutableListOf<CardItem>(CardItem.Header(getString(R.string.folder_list_section_destinations)))
+		if (PreferenceHelper.locationSelectEnabled) {
+			items.add(CardItem.Row(
+				key = KEY_LOCATION_SELECT,
+				title = getString(R.string.location_select_title),
+				summary = getString(R.string.location_select_summary),
+				icon = R.drawable.fs_ic_document,
+				clickable = false,
+			))
+		}
+		folderList.forEach { folder ->
+			val name = displayName(folder)
+			items.add(CardItem.Row(
+				key = folder,
+				title = name,
+				summary = displayPath(folder),
+				clickable = false,
+				actionIcon = R.drawable.fs_ic_delete,
+				actionDescription = getString(R.string.folder_list_delete_description, name),
+			))
+		}
+		adapter.items = items
+	}
+
+	private fun displayName(folder: String): String =
+		folder.substringAfterLast(File.separatorChar).ifBlank { getString(R.string.folder_list_root_folder) }
+
+	private fun displayPath(folder: String): String = if (folder.isBlank()) File.separator else folder
+
+	/**
+	 * Asks for confirmation, then removes a destination.
+	 */
+	private fun confirmDelete(folder: String) {
+		DialogHelper.showConfirmDialog(
+			this,
+			title = getString(R.string.folder_list_delete_title),
+			message = getString(R.string.folder_list_delete_message, displayPath(folder)),
+			confirmText = getString(R.string.folder_list_delete_confirm),
+		) {
+			if (folderList.remove(folder)) {
+				LocationHelper.saveFolderList(this, folderList)
+				showFolderList()
+			}
 		}
 	}
 

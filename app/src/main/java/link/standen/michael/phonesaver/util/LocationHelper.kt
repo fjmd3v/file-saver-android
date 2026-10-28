@@ -47,7 +47,8 @@ object LocationHelper {
 	 */
 	fun saveFolderList(context: Context, folderList: MutableList<String>) {
 		if (JsonFileHelper.saveJsonToFile(context, Gson().toJson(folderList), FOLDER_LIST_STORE)){
-			// Success
+			// Success. Keep Direct Share (sharing shortcuts) in sync.
+			DirectShareHelper.publish(context, folderList)
 		} else {
 			//TODO Toast an error? Or pass it up
 		}

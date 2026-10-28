@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-			 xmlns:app="http://schemas.android.com/apk/res-auto"
-			 android:layout_width="match_parent"
-			 android:layout_height="match_parent"
-			 app:iconSpaceReserved="false">
-	<fragment
-		android:id="@android:id/content"
+<com.hchen.himiuix.MiuixAppBar
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/appbar"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:title="@string/title_activity_settings">
+
+	<androidx.fragment.app.FragmentContainerView
+		android:id="@+id/fragment_container"
+		android:name="link.standen.michael.phonesaver.activity.SettingsActivity$PhoneSaverPreferenceFragment"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		class="link.standen.michael.phonesaver.activity.SettingsActivity$PhoneSaverPreferenceFragment" />
-</merge>
+		android:layout_height="match_parent" />
+</com.hchen.himiuix.MiuixAppBar>

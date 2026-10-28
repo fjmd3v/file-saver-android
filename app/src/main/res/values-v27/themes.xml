@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="Theme.FileSaver" parent="Base.Theme.FileSaver">
+		<item name="android:windowLightStatusBar">@bool/fs_light_system_bars</item>
+		<item name="android:windowLightNavigationBar">@bool/fs_light_system_bars</item>
+		<item name="android:navigationBarColor">@color/fs_nav_bar_scrim</item>
+	</style>
+</resources>

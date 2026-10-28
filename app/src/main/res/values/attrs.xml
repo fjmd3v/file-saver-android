@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- Theme colour roles. Provided by Theme.FileSaver and replaced by
+		 ThemeOverlay.FileSaver.DynamicColors when Monet colours are enabled. -->
+	<attr name="fsColorAccent" format="color" />
+	<attr name="fsColorOnAccent" format="color" />
+	<attr name="fsColorAccentContainer" format="color" />
+	<attr name="fsColorOnAccentContainer" format="color" />
+	<attr name="fsColorLink" format="color" />
+</resources>

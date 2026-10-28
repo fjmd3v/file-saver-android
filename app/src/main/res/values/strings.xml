@@ -14,8 +14,6 @@
 	<string name="action_credits">Credits</string>
 
 	<!-- Folder list -->
-	<string name="delete_button">Delete</string>
-	<string name="back_folder">\u2191 Back</string>
 
 	<string name="folder_list_empty_title">Welcome to Phone Saver!</string>
 	<string name="folder_list_empty_body">Please add a save location with the button below.</string>
@@ -24,8 +22,6 @@
 
 	<!-- Folder select -->
 	<string name="title_activity_folder_select">Select Folder</string>
-	<string name="navigation_here">Here</string>
-	<string name="navigation_read_only">Read Only</string>
 
 	<!-- Saving messages -->
 	<string name="toast_save_successful">Saved successfully.</string>
@@ -97,11 +93,6 @@
 	<string name="pref_description_location_select">Enable selection of location during saving using
 		Android\'s built in document UI. This is the recommended strategy for saving to an external
 		SD card.
-	</string>
-	<string name="pref_title_location_select_unavailable">UNAVAILABLE Enable location select</string>
-	<string name="pref_description_location_select_unavailable">Enable selection of location during saving using
-		Android\'s built in document UI. This is the recommended strategy for saving to an external
-		SD card. NOTE: This feature is not available for your version of Android.
 	</string>
 
 	<string name="pref_title_register_file">Register with media scanner</string>
@@ -182,5 +173,82 @@
 		</a>
 	</string>
 	<string name="support_footer">This message can be turned off in the settings.</string>
+
+	<!-- ===== Modernised UI (6.0) ===== -->
+	<string name="navigate_up">Navigate up</string>
+
+	<!-- Main screen -->
+	<string name="folder_list_section_destinations">Save destinations</string>
+	<string name="folder_list_add_destination">Add destination</string>
+	<string name="folder_list_root_folder">Storage root</string>
+	<string name="folder_list_delete_description">Remove %1$s</string>
+	<string name="folder_list_delete_title">Remove destination?</string>
+	<string name="folder_list_delete_message">%1$s will no longer appear when sharing. Files already saved there are not deleted.</string>
+	<string name="folder_list_delete_confirm">Remove</string>
+	<string name="location_select_title">Choose location when saving</string>
+	<string name="location_select_summary">Pick any folder, including SD cards, with the system file picker</string>
+
+	<!-- Folder select -->
+	<string name="folder_select_up">Parent folder</string>
+	<string name="folder_select_current">Current folder</string>
+	<string name="folder_select_empty">This folder has no subfolders</string>
+	<string name="folder_select_here">Save here</string>
+	<string name="folder_select_read_only">Read only — choose another folder</string>
+	<string name="folder_select_open_description">Open %1$s</string>
+
+	<!-- Saver -->
+	<string name="saver_title">Save to</string>
+	<string name="saver_subtitle_text">Text</string>
+	<string name="saver_subtitle_link">Link</string>
+	<plurals name="saver_subtitle_files">
+		<item quantity="one">%d item</item>
+		<item quantity="other">%d items</item>
+	</plurals>
+	<string name="saver_cancel">Cancel</string>
+
+	<!-- Settings -->
+	<string name="pref_category_saving">Saving</string>
+	<string name="pref_category_links">Links</string>
+	<string name="pref_category_appearance">Appearance</string>
+	<string name="pref_category_advanced">Advanced</string>
+	<string name="pref_category_about">About</string>
+	<string name="pref_title_theme">Theme</string>
+	<array name="pref_list_title_theme">
+		<item>Follow system</item>
+		<item>Light</item>
+		<item>Dark</item>
+	</array>
+	<array name="pref_list_values_theme">
+		<item>system</item>
+		<item>light</item>
+		<item>dark</item>
+	</array>
+	<string name="pref_default_value_theme" translatable="false">system</string>
+	<string name="pref_description_theme_system_unsupported">Android versions before 10 have no system dark theme, so "Follow system" uses the light theme.</string>
+	<string name="pref_title_dynamic_colors">Dynamic colours</string>
+	<string name="pref_description_dynamic_colors">Use colours from your wallpaper (Material You).</string>
+	<string name="pref_description_dynamic_colors_unavailable">Requires Android 12 or newer.</string>
+	<string name="pref_title_about">About &appname;</string>
+	<string name="pref_title_change_log">@string/action_change_log</string>
+
+	<!-- Credits -->
+	<string name="credits_section_about">About</string>
+	<string name="credits_section_licenses">Open source licences</string>
+	<string name="credits_miuix_title" translatable="false">Miuix XML (HiMiuix)</string>
+	<string name="credits_miuix_body">User interface components by HChenX, licensed under the
+		<a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a>.
+		Source: <a href="https://github.com/fjmd3v/miuix-xml">github.com/fjmd3v/miuix-xml</a></string>
+	<string name="credits_libraries_title">Other libraries</string>
+	<string name="credits_libraries_body">AndroidX (Apache 2.0), Gson (Apache 2.0), ckChangeLog (Apache 2.0), Kotlin (Apache 2.0).</string>
+
+	<!-- Overrides of Miuix XML default strings (the library ships Chinese only) -->
+	<string name="dialog_negative">Cancel</string>
+	<string name="dialog_positive">OK</string>
+	<string name="dialog_color_title">Colour</string>
+	<string name="dialog_color_message">Enter an 8 digit colour value</string>
+	<string name="color_hue">Hue</string>
+	<string name="color_saturation">Saturation</string>
+	<string name="color_lightness">Lightness</string>
+	<string name="color_alpha">Opacity</string>
 
 </resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="fs_accent">#2A66DB</color>
+	<color name="fs_on_accent">#FFFFFF</color>
+	<color name="fs_accent_container">#1E2A43</color>
+	<color name="fs_on_accent_container">#A9C6FF</color>
+
+	<color name="fs_danger">#FF6B60</color>
+	<color name="fs_danger_container">#3A1D1B</color>
+	<color name="fs_scrim">#99000000</color>
+	<color name="fs_disabled_container">#2E2E2E</color>
+	<color name="fs_disabled_text">#9A9A9A</color>
+
+	<color name="miuix_divider_color">#8E93AA</color>
+	<color name="fs_link">#A9C6FF</color>
+	<color name="fs_nav_bar_scrim">#B3000000</color>
+</resources>

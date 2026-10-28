@@ -12,16 +12,12 @@
 	<string name="action_credits">クレジット</string>
 
 	<!-- Folder list -->
-	<string name="delete_button">削除</string>
-	<string name="back_folder">\u2191 戻る</string>
 
 	<string name="folder_list_empty_title">Phone Saver へようこそ!</string>
 	<string name="folder_list_empty_body">下のボタンで保存する場所を追加してください。</string>
 
 	<!-- Folder select -->
 	<string name="title_activity_folder_select">フォルダーの選択</string>
-	<string name="navigation_here">ここ</string>
-	<string name="navigation_read_only">読み取り専用</string>
 
 	<!-- Saving messages -->
 	<string name="toast_save_successful">正常に保存しました</string>
@@ -54,4 +50,57 @@
 		<a href="https://github.com/naofum">Naofumi Fukue</a> によって提供されています。
 	</string>
 
+	<!-- ===== Modernised UI (6.0) ===== -->
+	<string name="navigate_up">前に戻る</string>
+	<string name="folder_list_section_destinations">保存先</string>
+	<string name="folder_list_add_destination">保存先を追加</string>
+	<string name="folder_list_root_folder">ストレージのルート</string>
+	<string name="folder_list_delete_description">%1$s を削除</string>
+	<string name="folder_list_delete_title">保存先を削除しますか？</string>
+	<string name="folder_list_delete_message">%1$s は共有時に表示されなくなります。保存済みのファイルは削除されません。</string>
+	<string name="folder_list_delete_confirm">削除</string>
+	<string name="location_select_title">保存時に場所を選択</string>
+	<string name="location_select_summary">システムのファイル選択で SD カードを含む任意のフォルダを選べます</string>
+	<string name="folder_select_up">親フォルダ</string>
+	<string name="folder_select_current">現在のフォルダ</string>
+	<string name="folder_select_empty">このフォルダにはサブフォルダがありません</string>
+	<string name="folder_select_here">ここに保存</string>
+	<string name="folder_select_read_only">読み取り専用 — 別のフォルダを選択してください</string>
+	<string name="folder_select_open_description">%1$s を開く</string>
+	<string name="saver_title">保存先</string>
+	<string name="saver_subtitle_text">テキスト</string>
+	<string name="saver_subtitle_link">リンク</string>
+	<string name="saver_cancel">キャンセル</string>
+	<string name="pref_category_saving">保存</string>
+	<string name="pref_category_links">リンク</string>
+	<string name="pref_category_appearance">外観</string>
+	<string name="pref_category_advanced">詳細</string>
+	<string name="pref_category_about">情報</string>
+	<string name="pref_title_theme">テーマ</string>
+	<string name="pref_description_theme_system_unsupported">Android 10 より前のバージョンにはシステムのダークテーマがないため、「システムに従う」はライトテーマになります。</string>
+	<string name="pref_title_dynamic_colors">ダイナミックカラー</string>
+	<string name="pref_description_dynamic_colors">壁紙の色を使用します（Material You）。</string>
+	<string name="pref_description_dynamic_colors_unavailable">Android 12 以降が必要です。</string>
+	<string name="pref_title_about">&appname; について</string>
+	<string name="credits_section_about">情報</string>
+	<string name="credits_section_licenses">オープンソースライセンス</string>
+	<string name="credits_miuix_body">UI コンポーネント: HChenX（<a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a>）。ソース: <a href="https://github.com/fjmd3v/miuix-xml">github.com/fjmd3v/miuix-xml</a></string>
+	<string name="credits_libraries_title">その他のライブラリ</string>
+	<string name="credits_libraries_body">AndroidX (Apache 2.0)、Gson (Apache 2.0)、ckChangeLog (Apache 2.0)、Kotlin (Apache 2.0)。</string>
+	<string name="dialog_negative">キャンセル</string>
+	<string name="dialog_positive">OK</string>
+	<string name="dialog_color_title">色</string>
+	<string name="dialog_color_message">8 桁のカラー値を入力してください</string>
+	<string name="color_hue">色相</string>
+	<string name="color_saturation">彩度</string>
+	<string name="color_lightness">明度</string>
+	<string name="color_alpha">不透明度</string>
+	<plurals name="saver_subtitle_files">
+		<item quantity="other">%d 件</item>
+	</plurals>
+	<array name="pref_list_title_theme">
+		<item>システムに従う</item>
+		<item>ライト</item>
+		<item>ダーク</item>
+	</array>
 </resources>

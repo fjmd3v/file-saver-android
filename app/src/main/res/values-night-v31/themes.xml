@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="ThemeOverlay.FileSaver.DynamicColors" parent="">
+		<item name="fsColorAccent">@android:color/system_accent1_600</item>
+		<item name="fsColorOnAccent">@android:color/system_accent1_0</item>
+		<item name="fsColorAccentContainer">@android:color/system_accent1_800</item>
+		<item name="fsColorOnAccentContainer">@android:color/system_accent1_100</item>
+		<item name="fsColorLink">@android:color/system_accent1_200</item>
+	</style>
+</resources>

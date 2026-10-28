@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Direct Share (sharing shortcuts) for Android 10+. The dynamic shortcuts themselves are
+	 published by DirectShareHelper with the category below. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+	<share-target android:targetClass="link.standen.michael.phonesaver.activity.SaverActivity">
+		<data android:mimeType="*/*" />
+		<category android:name="link.standen.michael.phonesaver.category.SAVE_TO_FOLDER" />
+	</share-target>
+</shortcuts>

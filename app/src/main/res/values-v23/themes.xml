@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="Theme.FileSaver" parent="Base.Theme.FileSaver">
+		<!-- Dark status bar icons on light backgrounds (inverted in values-night) -->
+		<item name="android:windowLightStatusBar">@bool/fs_light_system_bars</item>
+	</style>
+</resources>

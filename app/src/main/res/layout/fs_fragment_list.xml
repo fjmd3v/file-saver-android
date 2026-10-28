@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scrollable content linked to MiuixAppBar: the SpringBackLayout provides the Miuix
+	 over-scroll and reports its target so the large title can collapse. -->
+<com.hchen.himiuix.springback.SpringBackLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/spring_back"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	app:linkageAppBar="true"
+	app:scrollableView="@id/list">
+
+	<com.hchen.himiuix.fill.MiuixRecyclerFillView
+		android:id="@+id/list"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:clipToPadding="false"
+		android:overScrollMode="never"
+		android:scrollbars="vertical" />
+</com.hchen.himiuix.springback.SpringBackLayout>
