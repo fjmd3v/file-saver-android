@@ -17,6 +17,7 @@ import java.lang.ref.WeakReference
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
+import java.util.Locale
 
 /**
  * An async task to handle saving a single text entry
@@ -76,7 +77,7 @@ internal constructor(
 				}
 			}
 
-			urlContentType?.toLowerCase()?.let { contentType ->
+			urlContentType?.lowercase(Locale.getDefault())?.let { contentType ->
 				log.d("URL Content-Type: $contentType")
 				saverActivity.debugInfo.add(Pair("URL Content-Type", contentType))
 				val uri = Uri.parse(pair.url)
@@ -99,7 +100,7 @@ internal constructor(
 		} catch (e: MalformedURLException){
 			log.d("Text without URL")
 			// It's just some text
-			val mimeType: String = intent.type?.toLowerCase() ?: "text/plain"
+			val mimeType: String = intent.type?.lowercase(Locale.getDefault()) ?: "text/plain"
 			saverActivity.getFilename(intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: text,
 					mimeType, dryRun, { filename ->
 				saveString(saverActivity, text, filename, callback, dryRun)

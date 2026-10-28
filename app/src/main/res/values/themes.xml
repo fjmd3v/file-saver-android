@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style name="Base.Theme.FileSaver" parent="Theme.AppCompat.DayNight.NoActionBar">
+		<item name="fsColorAccent">@color/fs_accent</item>
+		<item name="fsColorOnAccent">@color/fs_on_accent</item>
+		<item name="fsColorAccentContainer">@color/fs_accent_container</item>
+		<item name="fsColorOnAccentContainer">@color/fs_on_accent_container</item>
+		<item name="fsColorLink">@color/fs_link</item>
+
+		<item name="colorPrimary">?attr/fsColorAccent</item>
+		<item name="colorPrimaryDark">@color/fs_window_background</item>
+		<item name="colorAccent">?attr/fsColorAccent</item>
+		<item name="colorControlNormal">@color/fs_text_primary</item>
+		<item name="colorControlActivated">?attr/fsColorAccent</item>
+		<item name="android:textColorPrimary">@color/fs_text_primary</item>
+		<item name="android:textColorSecondary">@color/fs_text_secondary</item>
+		<item name="android:textColorLink">?attr/fsColorLink</item>
+		<item name="android:windowBackground">@color/fs_window_background</item>
+		<item name="android:colorBackground">@color/fs_window_background</item>
+
+		<!-- Edge-to-edge: bars are transparent; insets are handled in code -->
+		<item name="android:statusBarColor">@android:color/transparent</item>
+		<item name="android:navigationBarColor">@color/fs_nav_bar_scrim_legacy</item>
+
+		<!-- Overflow menu: rounded Miuix-like popup -->
+		<item name="actionOverflowMenuStyle">@style/Widget.FileSaver.PopupMenu.Overflow</item>
+		<item name="popupMenuStyle">@style/Widget.FileSaver.PopupMenu</item>
+		<item name="textAppearanceLargePopupMenu">@style/TextAppearance.FileSaver.PopupMenu</item>
+		<item name="textAppearanceSmallPopupMenu">@style/TextAppearance.FileSaver.PopupMenu</item>
+		<item name="toolbarStyle">@style/Widget.FileSaver.Toolbar</item>
+
+		<!-- AppCompat dialogs that are not replaced by Miuix dialogs -->
+		<item name="alertDialogTheme">@style/ThemeOverlay.FileSaver.AlertDialog</item>
+	</style>
+
+	<style name="Theme.FileSaver" parent="Base.Theme.FileSaver" />
+
+	<!-- Share destination selector: translucent window with a bottom sheet -->
+	<style name="Theme.FileSaver.Sheet">
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+		<item name="android:windowAnimationStyle">@style/Animation.FileSaver.Sheet</item>
+		<item name="android:backgroundDimEnabled">false</item>
+		<item name="android:navigationBarColor">@android:color/transparent</item>
+	</style>
+
+	<style name="Animation.FileSaver.Sheet" parent="@android:style/Animation.Activity">
+		<item name="android:activityOpenEnterAnimation">@anim/fs_fade_in</item>
+		<item name="android:activityOpenExitAnimation">@anim/fs_fade_out</item>
+		<item name="android:activityCloseEnterAnimation">@anim/fs_fade_in</item>
+		<item name="android:activityCloseExitAnimation">@anim/fs_fade_out</item>
+	</style>
+
+	<style name="ThemeOverlay.FileSaver.AlertDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+		<item name="android:windowBackground">@drawable/fs_dialog_background</item>
+		<item name="colorAccent">?attr/fsColorAccent</item>
+	</style>
+
+	<!-- Dynamic colour overlay. On API < 31 it is a no-op; see values-v31. -->
+	<style name="ThemeOverlay.FileSaver.DynamicColors" parent="" />
+
+	<style name="Widget.FileSaver.Toolbar" parent="Widget.AppCompat.Toolbar">
+		<item name="popupTheme">@style/ThemeOverlay.FileSaver.Popup</item>
+	</style>
+
+	<style name="ThemeOverlay.FileSaver.Popup" parent="ThemeOverlay.AppCompat.DayNight">
+		<item name="android:textColorPrimary">@color/fs_text_primary</item>
+		<item name="actionOverflowMenuStyle">@style/Widget.FileSaver.PopupMenu.Overflow</item>
+		<item name="popupMenuStyle">@style/Widget.FileSaver.PopupMenu</item>
+		<item name="textAppearanceLargePopupMenu">@style/TextAppearance.FileSaver.PopupMenu</item>
+		<item name="textAppearanceSmallPopupMenu">@style/TextAppearance.FileSaver.PopupMenu</item>
+		<item name="listPreferredItemHeightSmall">@dimen/fs_touch_target_comfortable</item>
+		<item name="listPreferredItemPaddingLeft">@dimen/fs_popup_item_padding</item>
+		<item name="listPreferredItemPaddingRight">@dimen/fs_popup_item_padding</item>
+		<item name="dropDownListViewStyle">@style/Widget.FileSaver.DropDownListView</item>
+	</style>
+
+	<style name="Widget.FileSaver.PopupMenu" parent="Widget.AppCompat.PopupMenu">
+		<item name="android:popupBackground">@drawable/fs_popup_background</item>
+		<item name="android:popupElevation">@dimen/fs_popup_elevation</item>
+		<item name="android:dropDownVerticalOffset">@dimen/fs_popup_offset</item>
+	</style>
+
+	<style name="Widget.FileSaver.PopupMenu.Overflow" parent="Widget.AppCompat.PopupMenu.Overflow">
+		<item name="android:popupBackground">@drawable/fs_popup_background</item>
+		<item name="android:popupElevation">@dimen/fs_popup_elevation</item>
+		<item name="overlapAnchor">true</item>
+	</style>
+
+	<style name="Widget.FileSaver.DropDownListView" parent="Widget.AppCompat.ListView.DropDown">
+		<item name="android:divider">@null</item>
+		<item name="android:paddingTop">@dimen/fs_popup_list_padding</item>
+		<item name="android:paddingBottom">@dimen/fs_popup_list_padding</item>
+		<item name="android:clipToPadding">false</item>
+	</style>
+
+	<style name="TextAppearance.FileSaver.PopupMenu" parent="TextAppearance.AppCompat.Widget.PopupMenu.Large">
+		<item name="android:textSize">16sp</item>
+		<item name="android:textColor">@color/fs_text_primary</item>
+		<item name="android:fontFamily">sans-serif-medium</item>
+	</style>
+</resources>

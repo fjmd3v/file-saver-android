@@ -1,0 +1,26 @@
+name: Android CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build, lint and test
+        run: ./gradlew assembleDebug lintDebug testDebugUnitTest
+      - name: Verify target SDK is still 28
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          BADGING=$("$AAPT2" dump badging app/build/outputs/apk/debug/app-debug.apk | grep targetSdkVersion | head -1)
+          echo "$BADGING"
+          echo "$BADGING" | grep -q "targetSdkVersion:'28'"

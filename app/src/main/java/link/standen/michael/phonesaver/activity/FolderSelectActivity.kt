@@ -3,81 +3,107 @@ package link.standen.michael.phonesaver.activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.support.design.widget.BottomNavigationView
-import android.widget.ListView
-import android.widget.AdapterView
-import java.io.File
-import android.view.MenuItem
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.recyclerview.widget.RecyclerView
+import com.hchen.himiuix.MiuixAppBar
+import java.io.File
 import link.standen.michael.phonesaver.R.*
+import link.standen.michael.phonesaver.ui.CardItem
+import link.standen.michael.phonesaver.ui.CardListAdapter
+import link.standen.michael.phonesaver.ui.MiuixListFragment
 import link.standen.michael.phonesaver.util.DebugLogger
 import link.standen.michael.phonesaver.util.LocationHelper
+import java.util.Locale
 
 /**
  * An activity for selecting a folder in the file system.
  */
-class FolderSelectActivity : ListActivity() {
+class FolderSelectActivity : BaseActivity(), MiuixListFragment.Host {
 
 	companion object {
 		const val FOLDER_SELECTED = "FolderSelected"
+
+		private const val KEY_CURRENT = "current"
+		private const val KEY_BACK = "back"
+		private const val KEY_EMPTY = "empty"
+		private const val STATE_PATH = "currentPath"
 	}
 
 	private lateinit var log: DebugLogger
 
+	@Suppress("DEPRECATION")
 	private var currentPath: String = Environment.getExternalStorageDirectory().absolutePath
 
-	private lateinit var listView: ListView
+	private lateinit var appBar: MiuixAppBar
+
+	private var listView: RecyclerView? = null
 
 	private var folderList: List<String> = ArrayList()
 
-	private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-		when (item.itemId) {
-			id.navigation_here -> {
-				// Call back to previous activity with the location
-				val intent = Intent()
-				intent.putExtra(FOLDER_SELECTED, currentPath)
-				setResult(RESULT_OK, intent)
-				finish()
-				return@OnNavigationItemSelectedListener true
+	private val adapter = CardListAdapter(onRowClick = { row, _ ->
+		if (row.key == KEY_BACK) {
+			val back = getBackLocation()
+			if (back == null) {
+				cancelIntent()
+			} else {
+				currentPath = back
 			}
+		} else {
+			currentPath += row.key
 		}
-		false
-	}
+		updateListView()
+		listView?.scrollToPosition(0)
+	})
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(layout.folder_select_activity)
+		savedInstanceState?.getString(STATE_PATH)?.let { currentPath = it }
 
 		log = DebugLogger(this)
 
-		// Init list view
-		listView = findViewById(android.R.id.list)
-		listView.onItemClickListener = AdapterView.OnItemClickListener { _, view, _, _ ->
-			with(view as TextView){
-				if (view.text.toString() == resources.getString(string.back_folder)) {
-					val back = getBackLocation()
-					if (back == null) {
-						cancelIntent()
-					} else {
-						currentPath = back
-					}
-				} else {
-					currentPath += view.text.toString()
-				}
-				updateListView()
-			}
-		}
+		appBar = setUpAppBar(getString(string.title_activity_folder_select), showUp = true)
 
 		// Init bottom buttons
-		findViewById<BottomNavigationView>(id.navigation)
-				.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+		findViewById<View>(id.navigation_here).setOnClickListener {
+			// Call back to previous activity with the location
+			val intent = Intent()
+			intent.putExtra(FOLDER_SELECTED, currentPath)
+			setResult(RESULT_OK, intent)
+			finish()
+		}
+		applyBottomInset(findViewById(id.navigation), asMargin = false)
+
+		/**
+		 * Goes up a directory, unless at the top, then exits
+		 */
+		onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+				val back = getBackLocation()
+				if (back == null || currentPath == LocationHelper.rootLocation) {
+					cancelIntent()
+				} else {
+					currentPath = back
+					updateListView()
+				}
+			}
+		})
+	}
+
+	override fun onListViewCreated(recyclerView: RecyclerView) {
+		listView = recyclerView
+		recyclerView.adapter = adapter
 	}
 
 	override fun onStart() {
 		super.onStart()
 		updateListView()
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		super.onSaveInstanceState(outState)
+		outState.putString(STATE_PATH, currentPath)
 	}
 
 	/**
@@ -94,22 +120,55 @@ class FolderSelectActivity : ListActivity() {
 				// Get the file path
 				?.map { removeCurrent(it.absolutePath) }
 				// Sort it
-				?.sortedBy { it.toLowerCase() }
+				?.sortedBy { it.lowercase(Locale.getDefault()) }
 				// Convert to mutable
 				?.toMutableList()
 				// Default to empty
 				?: ArrayList()
 
-		// Add back button as first item
-		fList.add(0, resources.getString(string.back_folder))
-
 		folderList = fList.toList()
 		log.d("List length: "+folderList.size)
 
 		// Set title
-		this.title = LocationHelper.removeRoot(currentPath) + File.separatorChar
+		val relativePath = LocationHelper.removeRoot(currentPath)
+		this.title = relativePath + File.separatorChar
+		appBar.title = relativePath.substringAfterLast(File.separatorChar)
+				.ifBlank { getString(string.folder_list_root_folder) }
 
-		listView.adapter = ArrayAdapter<String>(this, layout.saver_list_item, folderList)
+		val items = mutableListOf<CardItem>(
+			CardItem.Row(
+				key = KEY_CURRENT,
+				title = getString(string.folder_select_current),
+				summary = this.title,
+				icon = drawable.fs_ic_folder,
+				clickable = false,
+			),
+			CardItem.Header(getString(string.title_activity_folder_select)),
+			// Back button as first item
+			CardItem.Row(
+				key = KEY_BACK,
+				title = getString(string.folder_select_up),
+				icon = drawable.fs_ic_arrow_upward,
+			),
+		)
+		folderList.forEach {
+			val name = it.trimStart(File.separatorChar)
+			items.add(CardItem.Row(
+				key = it,
+				title = name,
+				showChevron = true,
+				clickDescription = getString(string.folder_select_open_description, name),
+			))
+		}
+		if (folderList.isEmpty()) {
+			items.add(CardItem.Row(
+				key = KEY_EMPTY,
+				title = getString(string.folder_select_empty),
+				icon = drawable.fs_ic_folder,
+				clickable = false,
+			))
+		}
+		adapter.items = items
 
 		updateWritable(currentFile.canWrite())
 	}
@@ -127,31 +186,6 @@ class FolderSelectActivity : ListActivity() {
 	 */
 	private fun removeCurrent(location: String): String =
 		location.replace(currentPath, "")
-
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		when (item?.itemId){
-			android.R.id.home -> {
-				// Back button
-				onBackPressed()
-				return true
-			}
-
-		}
-		return super.onOptionsItemSelected(item)
-	}
-
-	/**
-	 * Goes up a directory, unless at the top, then exits
-	 */
-	override fun onBackPressed() {
-		val back = getBackLocation()
-		if (back == null || currentPath == LocationHelper.rootLocation) {
-			cancelIntent()
-		} else {
-			currentPath = back
-			updateListView()
-		}
-	}
 
 	/**
 	 * Cancels the current activity

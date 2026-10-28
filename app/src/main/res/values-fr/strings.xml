@@ -14,8 +14,6 @@
 	<string name="action_credits">Crédits</string>
 
 	<!-- Folder list -->
-	<string name="delete_button">Effacer</string>
-	<string name="back_folder">\u2191 Retour</string>
 
 	<string name="folder_list_empty_title">Bienvenue sur Phone Saver!</string>
 	<string name="folder_list_empty_body">Veuillez ajouter un lieu de sauvegarde avec le bouton ci-dessous.</string>
@@ -24,8 +22,6 @@
 
 	<!-- Folder select -->
 	<string name="title_activity_folder_select">Selectionner Fichier</string>
-	<string name="navigation_here">Ici</string>
-	<string name="navigation_read_only">Lecture uniquement</string>
 
 	<!-- Saving messages -->
 	<string name="toast_save_successful">Sauvegardé avec succès.</string>
@@ -95,11 +91,6 @@
 	<string name="pref_title_location_select">Activer la sélection de localisation</string>
 	<string name="pref_description_location_select">Activer la sélection de localisation pendant
 		la sauvegarde avec l\'interface utilisateur Android integrée. Recommandée pour sauvegarder sur une carte SD externe.
-	</string>
-	<string name="pref_title_location_select_unavailable">INDISPONIBLE Activer la sélection de localisation</string>
-	<string name="pref_description_location_select_unavailable">Activer la sélection de localisation pendant
-		la sauvegarde avec l\'interface utilisateur Android integrée. Recommandée pour sauvegarder sur une
-		carte SD externe. ATTENTION: Cette fonctionnalité est indisponible sur votre version d\'Android.
 	</string>
 
 	<string name="pref_title_register_file">Enregistrer avec scanneur de média</string>
@@ -183,4 +174,58 @@
 	</string>
 	<string name="support_footer">Ce message peut être désactivé dans les paramètres.</string>
 
+	<!-- ===== Modernised UI (6.0) ===== -->
+	<string name="navigate_up">Revenir en arrière</string>
+	<string name="folder_list_section_destinations">Emplacements d\'enregistrement</string>
+	<string name="folder_list_add_destination">Ajouter un emplacement</string>
+	<string name="folder_list_root_folder">Racine du stockage</string>
+	<string name="folder_list_delete_description">Supprimer %1$s</string>
+	<string name="folder_list_delete_title">Supprimer cet emplacement ?</string>
+	<string name="folder_list_delete_message">%1$s n\'apparaîtra plus lors du partage. Les fichiers déjà enregistrés ne sont pas supprimés.</string>
+	<string name="folder_list_delete_confirm">Supprimer</string>
+	<string name="location_select_title">Choisir l\'emplacement à l\'enregistrement</string>
+	<string name="location_select_summary">Choisissez n\'importe quel dossier, y compris sur carte SD, avec le sélecteur de fichiers du système</string>
+	<string name="folder_select_up">Dossier parent</string>
+	<string name="folder_select_current">Dossier actuel</string>
+	<string name="folder_select_empty">Ce dossier ne contient aucun sous-dossier</string>
+	<string name="folder_select_here">Enregistrer ici</string>
+	<string name="folder_select_read_only">Lecture seule — choisissez un autre dossier</string>
+	<string name="folder_select_open_description">Ouvrir %1$s</string>
+	<string name="saver_title">Enregistrer dans</string>
+	<string name="saver_subtitle_text">Texte</string>
+	<string name="saver_subtitle_link">Lien</string>
+	<string name="saver_cancel">Annuler</string>
+	<string name="pref_category_saving">Enregistrement</string>
+	<string name="pref_category_links">Liens</string>
+	<string name="pref_category_appearance">Apparence</string>
+	<string name="pref_category_advanced">Avancé</string>
+	<string name="pref_category_about">À propos</string>
+	<string name="pref_title_theme">Thème</string>
+	<string name="pref_description_theme_system_unsupported">Les versions d\'Android antérieures à 10 n\'ont pas de thème sombre système : « Suivre le système » utilise le thème clair.</string>
+	<string name="pref_title_dynamic_colors">Couleurs dynamiques</string>
+	<string name="pref_description_dynamic_colors">Utiliser les couleurs de votre fond d\'écran (Material You).</string>
+	<string name="pref_description_dynamic_colors_unavailable">Nécessite Android 12 ou une version ultérieure.</string>
+	<string name="pref_title_about">À propos de &appname;</string>
+	<string name="credits_section_about">À propos</string>
+	<string name="credits_section_licenses">Licences open source</string>
+	<string name="credits_miuix_body">Composants d\'interface par HChenX, sous licence <a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a>. Source : <a href="https://github.com/fjmd3v/miuix-xml">github.com/fjmd3v/miuix-xml</a></string>
+	<string name="credits_libraries_title">Autres bibliothèques</string>
+	<string name="credits_libraries_body">AndroidX (Apache 2.0), Gson (Apache 2.0), ckChangeLog (Apache 2.0), Kotlin (Apache 2.0).</string>
+	<string name="dialog_negative">Annuler</string>
+	<string name="dialog_positive">OK</string>
+	<string name="dialog_color_title">Couleur</string>
+	<string name="dialog_color_message">Saisissez une valeur de couleur à 8 chiffres</string>
+	<string name="color_hue">Teinte</string>
+	<string name="color_saturation">Saturation</string>
+	<string name="color_lightness">Luminosité</string>
+	<string name="color_alpha">Opacité</string>
+	<plurals name="saver_subtitle_files">
+		<item quantity="one">%d élément</item>
+		<item quantity="other">%d éléments</item>
+	</plurals>
+	<array name="pref_list_title_theme">
+		<item>Suivre le système</item>
+		<item>Clair</item>
+		<item>Sombre</item>
+	</array>
 </resources>

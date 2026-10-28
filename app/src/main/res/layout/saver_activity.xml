@@ -1,62 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-											 xmlns:app="http://schemas.android.com/apk/res-auto"
-											 xmlns:tools="http://schemas.android.com/tools"
-											 android:layout_width="match_parent"
-											 android:layout_height="match_parent"
-											 tools:context="link.standen.michael.phonesaver.activity.SaverActivity">
+<!-- Share destination selector, shown as a bottom sheet over the sharing app -->
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/scrim"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/fs_scrim"
+	tools:context="link.standen.michael.phonesaver.activity.SaverActivity">
 
-	<ListView
-		android:id="@android:id/list"
+	<LinearLayout
+		android:id="@+id/sheet"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:layout_marginTop="@dimen/activity_vertical_margin"
-		app:layout_constraintTop_toTopOf="parent"/>
-
-	<LinearLayout
-		android:id="@+id/not_supported_wrapper"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_margin="@dimen/activity_horizontal_margin"
+		android:layout_gravity="bottom|center_horizontal"
+		android:background="@drawable/fs_sheet_background"
+		android:clickable="true"
+		android:focusable="false"
+		tools:ignore="KeyboardInaccessibleWidget"
 		android:orientation="vertical"
-		android:visibility="gone">
+		android:paddingBottom="@dimen/miuix_basic_margin">
+
+		<View
+			android:layout_width="36dp"
+			android:layout_height="4dp"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="10dp"
+			android:background="@drawable/fs_sheet_handle"
+			android:importantForAccessibility="no" />
 
 		<TextView
+			android:id="@+id/sheet_title"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="@string/not_supported_content_type"
-			android:textAlignment="center"
-			android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+			android:layout_marginTop="14dp"
+			android:fontFamily="sans-serif-medium"
+			android:paddingStart="@dimen/miuix_appbar_padding_start"
+			android:paddingEnd="@dimen/miuix_appbar_padding_start"
+			android:text="@string/saver_title"
+			android:textAlignment="viewStart"
+			android:textColor="@color/fs_text_primary"
+			android:textSize="24sp" />
 
 		<TextView
-			android:id="@+id/not_supported"
+			android:id="@+id/sheet_subtitle"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:textAlignment="center"
-			android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+			android:layout_marginTop="2dp"
+			android:ellipsize="end"
+			android:maxLines="1"
+			android:paddingStart="@dimen/miuix_appbar_padding_start"
+			android:paddingEnd="@dimen/miuix_appbar_padding_start"
+			android:textAlignment="viewStart"
+			android:textColor="@color/fs_text_secondary"
+			android:textSize="@dimen/miuix_summary"
+			tools:text="1 item" />
+
+		<FrameLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/miuix_basic_margin">
+
+			<!-- Testing support (dry run) -->
+			<LinearLayout
+				android:id="@+id/loading"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="@dimen/miuix_prefs_margin"
+				android:layout_marginEnd="@dimen/miuix_prefs_margin"
+				android:background="@drawable/fs_card_background"
+				android:gravity="center_vertical"
+				android:minHeight="@dimen/fs_row_min_height"
+				android:orientation="horizontal"
+				android:padding="@dimen/fs_row_padding_horizontal">
+
+				<ProgressBar
+					android:layout_width="@dimen/fs_icon_tile"
+					android:layout_height="@dimen/fs_icon_tile"
+					android:indeterminateTint="?attr/fsColorAccent"
+					android:importantForAccessibility="no" />
+
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="@dimen/miuix_icon_margin"
+					android:layout_weight="1"
+					android:orientation="vertical">
+
+					<TextView
+						style="@style/MiuixTitleStyle"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:ellipsize="end"
+						android:focusable="false"
+						android:text="@string/loading_title" />
+
+					<TextView
+						style="@style/MiuixSummaryStyle"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:text="@string/loading_body" />
+				</LinearLayout>
+			</LinearLayout>
+
+			<link.standen.michael.phonesaver.ui.MaxHeightRecyclerView
+				android:id="@+id/list"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:clipToPadding="false"
+				android:overScrollMode="ifContentScrolls"
+				android:scrollbars="vertical"
+				android:visibility="gone" />
+
+			<!-- Unsupported content type -->
+			<LinearLayout
+				android:id="@+id/not_supported_wrapper"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="@dimen/miuix_prefs_margin"
+				android:layout_marginEnd="@dimen/miuix_prefs_margin"
+				android:background="@drawable/fs_card_background"
+				android:gravity="center_horizontal"
+				android:orientation="vertical"
+				android:padding="20dp"
+				android:visibility="gone">
+
+				<FrameLayout
+					android:layout_width="@dimen/fs_icon_tile"
+					android:layout_height="@dimen/fs_icon_tile"
+					android:background="@drawable/fs_icon_tile_danger"
+					android:importantForAccessibility="no">
+
+					<ImageView
+						android:layout_width="@dimen/fs_icon_size"
+						android:layout_height="@dimen/fs_icon_size"
+						android:layout_gravity="center"
+						android:importantForAccessibility="no"
+						app:srcCompat="@drawable/fs_ic_error"
+						app:tint="@color/fs_danger" />
+				</FrameLayout>
+
+				<TextView
+					android:id="@+id/not_supported_title"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="12dp"
+					android:fontFamily="sans-serif-medium"
+					android:text="@string/not_supported_content_type"
+					android:textAlignment="center"
+					android:textColor="@color/fs_text_primary"
+					android:textSize="18sp" />
+
+				<TextView
+					android:id="@+id/not_supported"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:lineSpacingMultiplier="1.2"
+					android:textAlignment="center"
+					android:textColor="@color/fs_text_secondary"
+					android:textColorLink="?attr/fsColorLink"
+					android:textSize="15sp" />
+			</LinearLayout>
+		</FrameLayout>
+
+		<Button
+			android:id="@+id/cancel"
+			style="@style/Widget.FileSaver.Button.Secondary"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="@dimen/miuix_dialog_padding"
+			android:layout_marginTop="@dimen/miuix_basic_margin"
+			android:layout_marginEnd="@dimen/miuix_dialog_padding"
+			android:text="@string/saver_cancel" />
 	</LinearLayout>
-
-	<LinearLayout
-		android:id="@+id/loading"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_margin="@dimen/activity_horizontal_margin"
-		android:orientation="vertical">
-
-		<TextView
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:text="@string/loading_title"
-			android:textAlignment="center"
-			android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
-
-		<TextView
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:text="@string/loading_body"
-			android:textAlignment="center"
-			android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
-	</LinearLayout>
-
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>

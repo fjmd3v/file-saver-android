@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Visible keyboard / switch-access focus indicator for custom rows -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:state_focused="true">
+		<shape android:shape="rectangle">
+			<corners android:radius="@dimen/fs_card_radius" />
+			<stroke android:width="2dp" android:color="?attr/fsColorAccent" />
+		</shape>
+	</item>
+	<item android:drawable="@android:color/transparent" />
+</selector>

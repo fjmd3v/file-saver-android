@@ -2,14 +2,14 @@ package link.standen.michael.phonesaver.util
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.support.v7.app.AlertDialog
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.widget.TextView
+import com.hchen.himiuix.dialog.MiuixAlertDialog
 import link.standen.michael.phonesaver.R
 
 /**
- * A helper class for managing dialog pop ups
+ * A helper class for managing dialog pop ups. Dialogs use the Miuix XML dialog component.
  */
 object DialogHelper {
 
@@ -17,19 +17,35 @@ object DialogHelper {
 	 * Shows the support dialog
 	 */
 	@SuppressLint("InflateParams")
-	fun showSupportDialog(activity: Activity) = AlertDialog.Builder(activity).apply {
+	fun showSupportDialog(activity: Activity) {
 		val view = activity.layoutInflater.inflate(R.layout.support_dialog, null)
-		setView(view)
-		setPositiveButton(android.R.string.ok) { dialog, _ ->
-			dialog.cancel()
-		}
-		val pop = create()
 
 		// Linkify
 		view.findViewById<TextView>(R.id.support_link).apply {
 			Linkify.addLinks(this, Linkify.ALL)
 			movementMethod = LinkMovementMethod.getInstance()
 		}
-		pop.show()
+
+		MiuixAlertDialog(activity)
+			.setTitle(activity.getString(R.string.support_header))
+			.setCustomView(view)
+			.setPositiveButton(activity.getString(android.R.string.ok)) { dialog, _ ->
+				dialog.cancel()
+			}
+			.show()
+	}
+
+	/**
+	 * Shows a confirmation dialog with Cancel and a confirm button.
+	 */
+	fun showConfirmDialog(activity: Activity, title: CharSequence, message: CharSequence,
+						  confirmText: CharSequence, onConfirm: () -> Unit) {
+		MiuixAlertDialog(activity)
+			.setTitle(title)
+			.setMessage(message)
+			.setNegativeButton(activity.getString(R.string.dialog_negative), null)
+			.setPositiveButton(confirmText) { _, _ -> onConfirm() }
+			.setHapticFeedbackEnabled(true)
+			.show()
 	}
 }

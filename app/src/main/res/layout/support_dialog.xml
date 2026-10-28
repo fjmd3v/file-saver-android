@@ -1,52 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<!-- Content of the "Support the developer" Miuix dialog (title is set by the dialog) -->
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
+	android:layout_height="wrap_content"
 	android:orientation="vertical">
 
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:padding="@dimen/dialog_margin"
-			android:orientation="vertical">
+	<TextView
+		style="@style/MiuixDialogMessageStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:text="@string/support_body1" />
 
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAlignment="center"
-				android:paddingTop="@dimen/dialog_padding"
-				android:text="@string/support_header"
-				android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"/>
+	<TextView
+		style="@style/MiuixDialogMessageStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/dialog_padding"
+		android:gravity="center"
+		android:text="@string/support_body2" />
 
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAlignment="center"
-				android:padding="@dimen/dialog_padding"
-				android:text="@string/support_body1"/>
+	<TextView
+		android:id="@+id/support_link"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/dialog_padding"
+		android:fontFamily="sans-serif-medium"
+		android:gravity="center"
+		android:minHeight="@dimen/fs_touch_target"
+		android:text="@string/support_link"
+		android:textColorLink="?attr/fsColorLink"
+		android:textSize="@dimen/miuix_dialog_message" />
 
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAlignment="center"
-				android:padding="@dimen/dialog_padding"
-				android:text="@string/support_body2"/>
-
-			<TextView
-				android:id="@+id/support_link"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAlignment="center"
-				android:padding="@dimen/dialog_padding"
-				android:text="@string/support_link"/>
-
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:textAlignment="center"
-				android:padding="@dimen/dialog_padding"
-				android:text="@string/support_footer"/>
-
-		</LinearLayout>
-</ScrollView>
+	<TextView
+		style="@style/MiuixDialogMessageStyle"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:text="@string/support_footer"
+		android:textColor="@color/miuix_summary_color"
+		android:textSize="@dimen/miuix_summary" />
+</LinearLayout>

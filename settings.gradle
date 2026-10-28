@@ -1,1 +1,24 @@
+pluginManagement {
+	repositories {
+		google()
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+dependencyResolutionManagement {
+	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+	repositories {
+		google()
+		mavenCentral()
+	}
+}
+
+rootProject.name = 'phone-saver'
+
 include ':app'
+
+// Miuix XML (HiMiuix) UI library, tracked as a git submodule.
+// Run `git submodule update --init` after cloning.
+include ':HiMiuix'
+project(':HiMiuix').projectDir = file('miuix-xml')

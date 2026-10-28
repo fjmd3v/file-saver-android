@@ -1,73 +1,113 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-				  xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Keys, stored value formats and defaults are unchanged from earlier versions.
+	 Drop-down preferences store the same entry values as the old ListPreferences
+	 through SettingsDataStore. Where the summary already describes the selected
+	 entry, the value is not repeated on the right (showOnTip) so the title fits. -->
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<ListPreference
-		android:defaultValue="@string/pref_default_value_file_exists"
-		android:entries="@array/pref_list_title_file_exists"
-		android:entryValues="@array/pref_list_values_file_exists"
-		android:key="file_exists"
-		android:negativeButtonText="@null"
-		android:positiveButtonText="@null"
-		android:title="@string/pref_title_file_exists"
-		app:iconSpaceReserved="false" />
+	<com.hchen.himiuix.preference.MiuixPreferenceCategory
+		android:key="category_saving"
+		android:title="@string/pref_category_saving">
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="location_select"
-		android:summary="@string/pref_description_location_select"
-		android:title="@string/pref_title_location_select"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixDropDownPreference
+			android:defaultValue="@string/pref_default_value_file_exists"
+			android:entries="@array/pref_list_title_file_exists"
+			android:key="file_exists"
+			app:showOnTip="false"
+			android:title="@string/pref_title_file_exists" />
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="register_file"
-		android:summary="@string/pref_description_register_file"
-		android:title="@string/pref_title_register_file"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="location_select"
+			android:summary="@string/pref_description_location_select"
+			android:title="@string/pref_title_location_select" />
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="lenient_regex"
-		android:summary="@string/pref_description_lenient_regex"
-		android:title="@string/pref_title_lenient_regex"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="register_file"
+			android:summary="@string/pref_description_register_file"
+			android:title="@string/pref_title_register_file" />
 
-	<SwitchPreference
-		android:defaultValue="true"
-		android:key="follow_redirects"
-		android:summary="@string/pref_description_follow_redirects"
-		android:title="@string/pref_title_follow_redirects"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="lenient_regex"
+			android:summary="@string/pref_description_lenient_regex"
+			android:title="@string/pref_title_lenient_regex" />
+	</com.hchen.himiuix.preference.MiuixPreferenceCategory>
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="force_saving"
-		android:summary="@string/pref_description_force_saving"
-		android:title="@string/pref_title_force_saving"
-		app:iconSpaceReserved="false" />
+	<com.hchen.himiuix.preference.MiuixPreferenceCategory
+		android:key="category_links"
+		android:title="@string/pref_category_links">
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="special_imgur"
-		android:summary="@string/pref_description_special_imgur"
-		android:title="@string/pref_title_special_imgur"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="true"
+			android:key="follow_redirects"
+			android:summary="@string/pref_description_follow_redirects"
+			android:title="@string/pref_title_follow_redirects" />
 
-	<ListPreference
-		android:defaultValue="@string/pref_default_value_log_to_user"
-		android:entries="@array/pref_list_title_log_to_user"
-		android:entryValues="@array/pref_list_values_log_to_user"
-		android:key="log_to_user"
-		android:negativeButtonText="@null"
-		android:positiveButtonText="@null"
-		android:title="@string/pref_title_log_to_user"
-		app:iconSpaceReserved="false" />
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="special_imgur"
+			android:summary="@string/pref_description_special_imgur"
+			android:title="@string/pref_title_special_imgur" />
+	</com.hchen.himiuix.preference.MiuixPreferenceCategory>
 
-	<SwitchPreference
-		android:defaultValue="false"
-		android:key="hide_support"
-		android:summary="@string/pref_description_hide_support"
-		android:title="@string/pref_title_hide_support"
-		app:iconSpaceReserved="false" />
+	<com.hchen.himiuix.preference.MiuixPreferenceCategory
+		android:key="category_appearance"
+		android:title="@string/pref_category_appearance">
+
+		<com.hchen.himiuix.preference.MiuixDropDownPreference
+			android:defaultValue="@string/pref_default_value_theme"
+			android:entries="@array/pref_list_title_theme"
+			android:key="theme_mode"
+			android:title="@string/pref_title_theme" />
+
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="dynamic_colors"
+			android:summary="@string/pref_description_dynamic_colors"
+			android:title="@string/pref_title_dynamic_colors" />
+	</com.hchen.himiuix.preference.MiuixPreferenceCategory>
+
+	<com.hchen.himiuix.preference.MiuixPreferenceCategory
+		android:key="category_advanced"
+		android:title="@string/pref_category_advanced">
+
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="force_saving"
+			android:summary="@string/pref_description_force_saving"
+			android:title="@string/pref_title_force_saving" />
+
+		<com.hchen.himiuix.preference.MiuixDropDownPreference
+			android:defaultValue="@string/pref_default_value_log_to_user"
+			android:entries="@array/pref_list_title_log_to_user"
+			android:key="log_to_user"
+			app:showOnTip="false"
+			android:title="@string/pref_title_log_to_user" />
+	</com.hchen.himiuix.preference.MiuixPreferenceCategory>
+
+	<com.hchen.himiuix.preference.MiuixPreferenceCategory
+		android:key="category_about"
+		android:title="@string/pref_category_about">
+
+		<com.hchen.himiuix.preference.MiuixSwitchPreference
+			android:defaultValue="false"
+			android:key="hide_support"
+			android:summary="@string/pref_description_hide_support"
+			android:title="@string/pref_title_hide_support" />
+
+		<com.hchen.himiuix.preference.MiuixPreference
+			android:key="change_log"
+			android:persistent="false"
+			android:title="@string/pref_title_change_log" />
+
+		<com.hchen.himiuix.preference.MiuixPreference
+			android:key="about"
+			android:persistent="false"
+			android:title="@string/pref_title_about" />
+	</com.hchen.himiuix.preference.MiuixPreferenceCategory>
 
 </PreferenceScreen>

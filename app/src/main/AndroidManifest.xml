@@ -1,48 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 		  xmlns:tools="http://schemas.android.com/tools"
-		  package="link.standen.michael.phonesaver"
 		  tools:ignore="GoogleAppIndexingWarning">
 
+	<!-- Legacy file system access. The app targets API 28 so these keep their
+		 pre-scoped-storage meaning (see README, "Storage compatibility"). -->
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 
 	<application
+		android:name=".FileSaverApplication"
 		android:allowBackup="true"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
-		android:theme="@style/AppTheme"
+		android:theme="@style/Theme.FileSaver"
 		android:fullBackupContent="@xml/backup_descriptor">
 		<activity
 			android:name=".activity.FolderListActivity"
-			android:label="@string/app_name"
-			android:theme="@style/AppTheme.NoActionBar">
+			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
+			<!-- Sharing shortcuts (Direct Share on Android 10+) -->
+			<meta-data
+				android:name="android.app.shortcuts"
+				android:resource="@xml/shortcuts" />
 		</activity>
 		<activity
 			android:name=".activity.FolderSelectActivity"
+			android:exported="false"
 			android:label="@string/title_activity_folder_select"
-			android:theme="@style/AppTheme">
-			<meta-data
-				android:name="android.support.PARENT_ACTIVITY"
-				android:value="link.standen.michael.phonesaver.activity.FolderListActivity" />
-		</activity>
+			android:parentActivityName=".activity.FolderListActivity" />
 		<activity
 			android:name=".activity.CreditsActivity"
+			android:exported="false"
 			android:label="@string/title_activity_credits"
-			android:theme="@style/AppTheme.NoActionBar">
-		</activity>
+			android:parentActivityName=".activity.FolderListActivity" />
+		<!-- Share target: must stay exported so other apps can share to it -->
 		<activity
 			android:name=".activity.SaverActivity"
-			android:label="@string/app_name"
-			android:theme="@style/AppTheme">
+			android:exported="true"
+			android:theme="@style/Theme.FileSaver.Sheet">
 			<intent-filter>
 				<action android:name="android.intent.action.SEND" />
 				<category android:name="android.intent.category.DEFAULT" />
@@ -53,27 +56,34 @@
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="*/*" />
 			</intent-filter>
+			<!-- Direct Share on Android 6.0 - 9 -->
 			<meta-data
 				android:name="android.service.chooser.chooser_target_service"
 				android:value=".service.LocationChooserTargetService" />
 		</activity>
 		<activity
 			android:name=".activity.SettingsActivity"
-			android:label="@string/title_activity_settings">
-			<meta-data
-				android:name="android.support.PARENT_ACTIVITY"
-				android:value="link.standen.michael.phonesaver.activity.FolderListActivity" />
-		</activity>
+			android:exported="false"
+			android:label="@string/title_activity_settings"
+			android:parentActivityName=".activity.FolderListActivity" />
 
-		<receiver android:name=".receiver.DownloadBroadcastReceiver">
+		<!-- DOWNLOAD_COMPLETE is sent by the DownloadManager provider (a different
+			 package), so this receiver has to be exported to receive it. -->
+		<receiver
+			android:name=".receiver.DownloadBroadcastReceiver"
+			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
 			</intent-filter>
 		</receiver>
 
+		<!-- Bound by the system chooser only; protected by BIND_CHOOSER_TARGET_SERVICE -->
 		<service android:name=".service.LocationChooserTargetService"
+			android:exported="true"
 			android:label="@string/app_name"
-			android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE">
+			android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"
+			tools:ignore="ExportedService"
+			tools:targetApi="m">
 			<intent-filter>
 				<action android:name="android.service.chooser.ChooserTargetService" />
 			</intent-filter>

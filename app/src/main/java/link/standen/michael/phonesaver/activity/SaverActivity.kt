@@ -16,19 +16,28 @@ import android.text.method.LinkMovementMethod
 import android.view.View
 import android.webkit.MimeTypeMap
 import android.widget.*
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import link.standen.michael.phonesaver.util.DebugLogger
 import java.io.*
 import android.widget.TextView
 import link.standen.michael.phonesaver.saver.LocationSelectTask
 import link.standen.michael.phonesaver.saver.HandleSingleTextTask
 import link.standen.michael.phonesaver.data.Pair
+import link.standen.michael.phonesaver.ui.CardItem
+import link.standen.michael.phonesaver.ui.CardListAdapter
+import link.standen.michael.phonesaver.util.DirectShareHelper
 import link.standen.michael.phonesaver.util.PreferenceHelper
+import java.net.MalformedURLException
+import java.net.URL
+import java.util.Locale
 
 /**
  * An activity to handle saving files.
  * https://developer.android.com/training/sharing/receive.html
  */
-class SaverActivity : ListActivity() {
+class SaverActivity : BaseActivity() {
 
 	companion object {
 		const val FILENAME_REGEX = "[^-_.A-Za-z0-9]"
@@ -54,11 +63,14 @@ class SaverActivity : ListActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.saver_activity)
+		setUpSheet()
 
 		log = DebugLogger(this)
 
 		preferenceHelper.loadPreferences()
 		val directShareLocation = intent?.extras?.getString(DIRECT_SHARE_FOLDER)
+				// Sharing shortcut (Direct Share on Android 10+)
+				?: DirectShareHelper.folderForShortcut(this, intent?.getStringExtra(ShortcutManagerCompat.EXTRA_SHORTCUT_ID))
 
 		when {
 			directShareLocation != null -> {
@@ -81,6 +93,85 @@ class SaverActivity : ListActivity() {
 	}
 
 	/**
+	 * Prepare the bottom sheet presentation. Tapping outside the sheet or Cancel closes it
+	 * without saving, exactly like pressing back.
+	 */
+	private fun setUpSheet() {
+		val sheet = findViewById<View>(R.id.sheet)
+		applyBottomInset(sheet, asMargin = false)
+
+		// Limit the width on tablets and in landscape
+		val maxWidth = resources.getDimensionPixelSize(R.dimen.fs_sheet_max_width)
+		if (resources.displayMetrics.widthPixels > maxWidth) {
+			sheet.layoutParams = sheet.layoutParams.apply { width = maxWidth }
+		}
+
+		findViewById<View>(R.id.scrim).setOnClickListener { finish() }
+		findViewById<View>(R.id.cancel).setOnClickListener { finish() }
+		findViewById<TextView>(R.id.sheet_subtitle).text = describeSharedContent()
+
+		// Slide in. Uses the animator duration scale, so it is instant when animations are off.
+		sheet.post {
+			sheet.translationY = sheet.height.toFloat()
+			sheet.animate().translationY(0f)
+				.setDuration(resources.getInteger(android.R.integer.config_mediumAnimTime).toLong())
+				.setInterpolator(android.view.animation.DecelerateInterpolator(2f))
+				.start()
+		}
+	}
+
+	/**
+	 * A short description of what is being shared, e.g. "3 items" or "Link".
+	 */
+	private fun describeSharedContent(): CharSequence? = try {
+		@Suppress("DEPRECATION")
+		when {
+			Intent.ACTION_SEND_MULTIPLE == intent.action ->
+				intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)?.size?.let {
+					resources.getQuantityString(R.plurals.saver_subtitle_files, it, it)
+				}
+			intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) != null ->
+				intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.let { uri ->
+					uri.lastPathSegment?.substringAfterLast(File.separatorChar)
+				} ?: resources.getQuantityString(R.plurals.saver_subtitle_files, 1, 1)
+			intent.getStringExtra(Intent.EXTRA_TEXT) != null -> {
+				val text = intent.getStringExtra(Intent.EXTRA_TEXT)!!
+				if (isUrl(text)) getString(R.string.saver_subtitle_link) else getString(R.string.saver_subtitle_text)
+			}
+			else -> intent.type
+		}
+	} catch (e: RuntimeException) {
+		// Malformed extras from the sharing app; the description is only cosmetic
+		null
+	}
+
+	private fun isUrl(text: String): Boolean = try {
+		URL(text)
+		true
+	} catch (e: MalformedURLException) {
+		false
+	}
+
+	private fun destinationRow(location: String, position: Int): CardItem.Row =
+		if (PreferenceHelper.locationSelectEnabled && position == 0) {
+			CardItem.Row(
+				key = location,
+				title = getString(R.string.location_select_title),
+				summary = getString(R.string.location_select_summary),
+				icon = R.drawable.fs_ic_document,
+				showChevron = true,
+			)
+		} else {
+			val name = location.substringAfterLast(File.separatorChar)
+					.ifBlank { getString(R.string.folder_list_root_folder) }
+			CardItem.Row(
+				key = location,
+				title = name,
+				summary = if (location.isBlank()) File.separator else location,
+			)
+		}
+
+	/**
 	 * Load the list of locations
 	 */
 	private fun loadList() {
@@ -91,17 +182,23 @@ class SaverActivity : ListActivity() {
 					runOnUiThread {
 						findViewById<View>(R.id.loading).visibility = View.GONE
 						// Init list view
-						val listView = findViewById<ListView>(android.R.id.list)
-						listView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-							if (!PreferenceHelper.locationSelectEnabled || position != 0){
-								// The first item is the location select. Set location otherwise
-								location = LocationHelper.addRoot(locations[position])
+						val listView = findViewById<RecyclerView>(R.id.list)
+						listView.visibility = View.VISIBLE
+						listView.layoutManager = LinearLayoutManager(this)
+						var selected = false
+						listView.adapter = CardListAdapter(onRowClick = { _, position ->
+							// Ignore repeated taps while the first selection is being saved
+							if (!selected) {
+								selected = true
+								if (!PreferenceHelper.locationSelectEnabled || position != 0){
+									// The first item is the location select. Set location otherwise
+									location = LocationHelper.addRoot(locations[position])
+								}
+								useIntent({ finishIntent(it) })
 							}
-							useIntent({ finishIntent(it) })
+						}).apply {
+							items = locations.mapIndexed { position, it -> destinationRow(it, position) }
 						}
-						listView.adapter = ArrayAdapter<String>(this, R.layout.saver_list_item, locations.map {
-							if (it.isBlank()) File.separator else it
-						})
 					}
 					return // await selection
 				}
@@ -139,7 +236,7 @@ class SaverActivity : ListActivity() {
 		log.i("Action: $action")
 		log.i("Type: $type")
 
-		type?.toLowerCase()?.let {
+		type?.lowercase(Locale.getDefault())?.let {
 			if (Intent.ACTION_SEND == action) {
 				return handleSingle(callback, dryRun)
 			} else if (Intent.ACTION_SEND_MULTIPLE == action) {
@@ -165,7 +262,7 @@ class SaverActivity : ListActivity() {
 		// Hide list
 		runOnUiThread {
 			findViewById<View>(R.id.loading).visibility = View.GONE
-			findViewById<View>(android.R.id.list).visibility = View.GONE
+			findViewById<View>(R.id.list).visibility = View.GONE
 			// Generate issue text here as should always be English and does not need to be in strings.xml
 			val bobTitle = StringBuilder()
 			bobTitle.append("Support Request - ")
@@ -253,6 +350,7 @@ class SaverActivity : ListActivity() {
 	 */
 	private fun handleSingle(callback: (success: Boolean?) -> Unit, dryRun: Boolean) {
 		// Try save stream first
+		@Suppress("DEPRECATION")
 		intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.let {
 			log.d("Text has stream")
 			getFilename(it, intent.type ?: "", dryRun) {filename ->
@@ -272,6 +370,7 @@ class SaverActivity : ListActivity() {
 	 * Handle the saving of multiple streams.
 	 */
 	private fun handleMultiple(callback: (success: Boolean?) -> Unit, dryRun: Boolean) {
+		@Suppress("DEPRECATION")
 		val imageUris: ArrayList<Uri>? = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)
 		imageUris?.let {
 			var counter = 0
@@ -386,8 +485,9 @@ class SaverActivity : ListActivity() {
 		// Find the actual filename
 		if (uri.scheme == "content") {
 			contentResolver.query(uri, null, null, null, null)?.use {
-				if (it.moveToFirst()) {
-					return getFilename(it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME)), mime, dryRun, callback, uri)
+				val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+				if (nameIndex >= 0 && it.moveToFirst()) {
+					return getFilename(it.getString(nameIndex), mime, dryRun, callback, uri)
 				}
 			}
 		}

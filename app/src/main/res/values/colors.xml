@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#3F51B5</color>
-	<color name="colorPrimaryDark">#303F9F</color>
-	<color name="colorAccent">#FF4081</color>
+	<!-- Accent colours follow the Miuix XML palette (miuix_switch_on). They are only
+		 used through the ?attr/fsColorAccent family so dynamic colours can replace them. -->
+	<color name="fs_accent">#2F6EE8</color>
+	<color name="fs_on_accent">#FFFFFF</color>
+	<color name="fs_accent_container">#E6EFFF</color>
+	<color name="fs_on_accent_container">#1A5FD0</color>
 
-	<color name="white">#FFFFFF</color>
+	<!-- Surfaces (match Miuix XML light/dark surfaces) -->
+	<color name="fs_window_background">@color/miuix_theme_color</color>
+	<color name="fs_surface">@color/miuix_basic_background_color</color>
+	<color name="fs_text_primary">@color/miuix_title_color</color>
+	<color name="fs_text_secondary">@color/miuix_summary_color</color>
+	<color name="fs_danger">#D32F2F</color>
+	<color name="fs_danger_container">#FDECEA</color>
+	<color name="fs_scrim">#61000000</color>
+	<color name="fs_disabled_container">#E8E8E8</color>
+	<color name="fs_disabled_text">#6E6E6E</color>
+
+
+	<!-- Overrides of Miuix XML colours for WCAG AA text contrast -->
+	<color name="miuix_divider_color">#5F6584</color>
+	<color name="fs_link">@color/fs_accent</color>
+	<color name="fs_nav_bar_scrim">#B3F7F7F7</color>
+	<!-- Light navigation bar icons need API 27; use a dark scrim before that -->
+	<color name="fs_nav_bar_scrim_legacy">#80000000</color>
 </resources>

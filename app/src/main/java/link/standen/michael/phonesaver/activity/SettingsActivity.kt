@@ -1,77 +1,107 @@
 package link.standen.michael.phonesaver.activity
 
-import android.os.Build
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
-import android.view.MenuItem
+import androidx.annotation.ArrayRes
+import androidx.preference.Preference
+import androidx.preference.PreferenceManager
+import com.hchen.himiuix.callback.OnChooseItemListener
+import com.hchen.himiuix.preference.MiuixDropDownPreference
+import com.hchen.himiuix.preference.MiuixSwitchPreference
 import link.standen.michael.phonesaver.R
+import link.standen.michael.phonesaver.util.ChangeLogHelper
+import link.standen.michael.phonesaver.util.SettingsDataStore
+import link.standen.michael.phonesaver.util.ThemeHelper
 
 /**
- * A Preference Activity that presents a set of application settings. On
- * handset devices, settings are presented as a single list. On tablets,
- * settings are split by category, with category headers shown to the left of
- * the list of settings.
+ * Application settings, presented as grouped Miuix preference cards.
  */
-class SettingsActivity: AppCompatActivity() {
+class SettingsActivity: BaseActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		supportActionBar?.setDisplayHomeAsUpEnabled(true)
 		setContentView(R.layout.settings_activity)
+		setUpAppBar(getString(R.string.title_activity_settings), showUp = true)
 	}
 
-	class PhoneSaverPreferenceFragment: PreferenceFragmentCompat() {
-		override fun onCreate(savedInstanceState: Bundle?) {
-			super.onCreate(savedInstanceState)
-			setHasOptionsMenu(true)
-		}
+	/**
+	 * Miuix XML requires its own PreferenceFragmentCompat subclass for MiuixAppBar linkage.
+	 */
+	class PhoneSaverPreferenceFragment: com.hchen.himiuix.fragment.PreferenceFragmentCompat(),
+			SharedPreferences.OnSharedPreferenceChangeListener {
+
+		private lateinit var sharedPreferences: SharedPreferences
 
 		override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+			sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+			// Keep the stored value format of the old ListPreferences (see SettingsDataStore)
+			preferenceManager.preferenceDataStore = SettingsDataStore(sharedPreferences, mapOf(
+				"file_exists" to resources.getStringArray(R.array.pref_list_values_file_exists),
+				"log_to_user" to resources.getStringArray(R.array.pref_list_values_log_to_user),
+				ThemeHelper.PREF_THEME to resources.getStringArray(R.array.pref_list_values_theme),
+			))
 			setPreferencesFromResource(R.xml.preferences, rootKey)
 
-			// Bind the summaries of file exists preferences to their value summary.
-			val fileExistsPref = findPreference("file_exists")
-			fileExistsPref.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
-				updateListPreferenceSummary(R.array.pref_list_description_file_exists, preference, newValue.toString())
-			}
-			updateListPreferenceSummary(R.array.pref_list_description_file_exists, fileExistsPref)
+			// Bind the summaries of list preferences to their value description.
+			bindDescriptionSummary("file_exists", R.array.pref_list_description_file_exists)
+			bindDescriptionSummary("log_to_user", R.array.pref_list_description_log_to_user)
 
-			// Bind the summaries of log to user preferences to their value summary.
-			val logToUserPref = findPreference("log_to_user")
-			logToUserPref.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
-				updateListPreferenceSummary(R.array.pref_list_description_log_to_user, preference, newValue.toString())
+			if (!ThemeHelper.isSystemDarkThemeAvailable) {
+				findPreference<Preference>(ThemeHelper.PREF_THEME)
+					?.setSummary(R.string.pref_description_theme_system_unsupported)
 			}
-			updateListPreferenceSummary(R.array.pref_list_description_log_to_user, logToUserPref)
 
-			// Block the location select feature by API level
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-				with (findPreference("location_select")){
-					isEnabled = false
-					setTitle(R.string.pref_title_location_select_unavailable)
-					setSummary(R.string.pref_description_location_select_unavailable)
+			// Dynamic colours only exist on Android 12+
+			findPreference<MiuixSwitchPreference>(ThemeHelper.PREF_DYNAMIC_COLORS)?.let {
+				if (!ThemeHelper.isDynamicColorAvailable) {
+					it.isEnabled = false
+					it.setSummary(R.string.pref_description_dynamic_colors_unavailable)
 				}
 			}
+
+			findPreference<Preference>("change_log")?.setOnPreferenceClickListener {
+				ChangeLogHelper.show(requireActivity(), true)
+				true
+			}
+			findPreference<Preference>("about")?.setOnPreferenceClickListener {
+				startActivity(Intent(requireContext(), CreditsActivity::class.java))
+				true
+			}
 		}
 
-		override fun onOptionsItemSelected(item: MenuItem): Boolean {
-			val id = item.itemId
-			if (id == android.R.id.home) {
-				activity?.onBackPressed()
-				return true
-			}
-			return super.onOptionsItemSelected(item)
+		override fun onResume() {
+			super.onResume()
+			sharedPreferences.registerOnSharedPreferenceChangeListener(this)
 		}
 
-		private fun updateListPreferenceSummary(descriptionArray: Int, preference: Preference, newValue: String? = null): Boolean {
-			with (preference as ListPreference) {
-				val index = findIndexOfValue(newValue?: value.toString())
-				// Set the summary to reflect the new value.
-				summary = if (index >= 0) context.resources.getStringArray(descriptionArray)[index] else null
+		override fun onPause() {
+			sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+			super.onPause()
+		}
+
+		override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
+			when (key) {
+				// Recreates all activities with the new night mode
+				ThemeHelper.PREF_THEME -> ThemeHelper.applyNightMode(requireContext())
+				// Other activities recreate themselves on resume (BaseActivity)
+				ThemeHelper.PREF_DYNAMIC_COLORS -> activity?.recreate()
 			}
-			return true
+		}
+
+		/**
+		 * Shows the description of the selected entry as the summary.
+		 */
+		private fun bindDescriptionSummary(key: String, @ArrayRes descriptionArray: Int) {
+			val preference = findPreference<MiuixDropDownPreference>(key) ?: return
+			val descriptions = resources.getStringArray(descriptionArray)
+			preference.summary = preference.value?.toIntOrNull()?.let { descriptions.getOrNull(it) }
+			preference.setOnChooseItemListener(object : OnChooseItemListener {
+				override fun onChooseBefore(item: CharSequence?, which: Int): Boolean {
+					preference.summary = descriptions.getOrNull(which)
+					return true
+				}
+			})
 		}
 	}
 }
