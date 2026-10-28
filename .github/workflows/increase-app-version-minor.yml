@@ -1,0 +1,69 @@
+name: Increase App Version (MINOR)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-app-metadata-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump-minor:
+    if: startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+
+      - name: Increase minor version and versionCode
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          paths = sorted(list(Path('.').rglob('build.gradle')) + list(Path('.').rglob('build.gradle.kts')))
+          paths = [p for p in paths if not any(part.startswith('.') or part in ('build', '.gradle') for part in p.parts)]
+          app_re = re.compile(r'''(?m)^\s*applicationId\s*(?:=\s*)?["'][^"']+["']''')
+          matches = [p for p in paths if app_re.search(p.read_text(encoding='utf-8'))]
+          if len(matches) != 1:
+              raise SystemExit(f'Expected exactly one application module with a literal applicationId; found: {matches}')
+          path = matches[0]
+          content = path.read_text(encoding='utf-8')
+
+          name_re = re.compile(r'''(?m)^(\s*versionName\s*(?:=\s*)?["'])(\d+)\.(\d+)\.(\d+)(["'])''')
+          code_re = re.compile(r'(?m)^(\s*versionCode\s*(?:=\s*)?)(\d+)\b')
+          names = list(name_re.finditer(content))
+          codes = list(code_re.finditer(content))
+          if len(names) != 1 or len(codes) != 1:
+              raise SystemExit(f'Expected one literal X.Y.Z versionName and one numeric versionCode in {path}; found {len(names)} and {len(codes)}')
+
+          name = names[0]
+          old_version = f'{name.group(2)}.{name.group(3)}.{name.group(4)}'
+          new_version = f'{name.group(2)}.{int(name.group(3)) + 1}.0'
+          old_code = int(codes[0].group(2))
+          new_code = old_code + 1
+          content = name_re.sub(lambda m: f'{m.group(1)}{new_version}{m.group(5)}', content, count=1)
+          content = code_re.sub(lambda m: f'{m.group(1)}{new_code}', content, count=1)
+          path.write_text(content, encoding='utf-8')
+          print(f'{path}: versionName {old_version} -> {new_version}; versionCode {old_code} -> {new_code}')
+          PY
+
+      - name: Commit and push changes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes detected.'
+            exit 0
+          fi
+          git commit -m 'chore(android): bump minor app version'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -1,0 +1,116 @@
+name: Rename App Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_package_name:
+        description: 'New Package Name (ex: com.android.app)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-app-metadata-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rename:
+    if: startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          persist-credentials: true
+
+      - name: Rename Android package and source directories
+        env:
+          NEW_PACKAGE: ${{ inputs.new_package_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          new = os.environ['NEW_PACKAGE'].strip()
+          if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+', new):
+              raise SystemExit(f'Invalid Android package name: {new!r}')
+
+          root = Path('.')
+          gradle_files = sorted(list(root.rglob('build.gradle')) + list(root.rglob('build.gradle.kts')))
+          gradle_files = [p for p in gradle_files if not any(part.startswith('.') or part in ('build', '.gradle') for part in p.parts)]
+          app_id_re = re.compile(r'''(?m)^\s*applicationId\s*(?:=\s*)?["']([A-Za-z][A-Za-z0-9_.]*)["']''')
+          candidates = [(p, app_id_re.search(p.read_text(encoding='utf-8'))) for p in gradle_files]
+          candidates = [(p, m.group(1)) for p, m in candidates if m]
+          if len(candidates) != 1:
+              raise SystemExit(f'Expected exactly one Android application module with a literal applicationId; found: {candidates}')
+          module_file, old = candidates[0]
+          if old == new:
+              raise SystemExit('The requested package name already matches the existing applicationId.')
+          module_dir = module_file.parent
+          print(f'Changing {old} -> {new} in module {module_dir}')
+
+          # Update the original package literal in tracked, text-based Android project files.
+          # This includes namespace, applicationId, imports, manifest authorities,
+          # configuration, and package declarations. Binary files are left untouched.
+          tracked = subprocess.check_output(['git', 'ls-files', '-z']).split(b'\0')
+          permitted = {'.kt', '.java', '.xml', '.gradle', '.kts', '.properties', '.pro', '.json', '.toml'}
+          changed = 0
+          for raw in tracked:
+              if not raw:
+                  continue
+              path = Path(os.fsdecode(raw))
+              if not path.is_file() or path.suffix not in permitted:
+                  continue
+              if any(part in ('build', '.gradle') for part in path.parts):
+                  continue
+              try:
+                  content = path.read_text(encoding='utf-8')
+              except (UnicodeDecodeError, OSError):
+                  continue
+              # Avoid altering longer package names that merely share a prefix.
+              updated = re.sub(r'(?<![\w.])' + re.escape(old) + r'(?![\w])', new, content)
+              if updated != content:
+                  path.write_text(updated, encoding='utf-8')
+                  print(f'Updated: {path}')
+                  changed += 1
+
+          # Move conventional source package directories, including test source sets.
+          old_parts, new_parts = old.split('.'), new.split('.')
+          source_root = module_dir / 'src'
+          if source_root.exists():
+              for source_set in source_root.iterdir():
+                  for lang in ('java', 'kotlin'):
+                      base = source_set / lang
+                      source = base.joinpath(*old_parts)
+                      dest = base.joinpath(*new_parts)
+                      if not source.is_dir():
+                          continue
+                      if dest.exists():
+                          raise SystemExit(f'Cannot move {source}: destination {dest} already exists')
+                      dest.parent.mkdir(parents=True, exist_ok=True)
+                      # Use a filesystem move; git add -A will record resulting renames.
+                      source.rename(dest)
+                      print(f'Moved: {source} -> {dest}')
+
+          if not changed:
+              raise SystemExit('No tracked text files contained the original applicationId.')
+          PY
+
+      - name: Commit and push changes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes detected.'
+            exit 0
+          fi
+          git commit -m "chore(android): rename app package to ${{ inputs.new_package_name }}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
