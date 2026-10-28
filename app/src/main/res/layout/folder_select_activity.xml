@@ -6,7 +6,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	tools:ignore="MergeRootFrame"
-	tools:context="link.standen.michael.phonesaver.activity.FolderSelectActivity">
+	tools:context="fjm.sh.filesaver.activity.FolderSelectActivity">
 
 	<com.hchen.himiuix.MiuixAppBar
 		android:id="@+id/appbar"
@@ -16,7 +16,7 @@
 
 		<androidx.fragment.app.FragmentContainerView
 			android:id="@+id/fragment_container"
-			android:name="link.standen.michael.phonesaver.ui.MiuixListFragment"
+			android:name="fjm.sh.filesaver.ui.MiuixListFragment"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent" />
 	</com.hchen.himiuix.MiuixAppBar>

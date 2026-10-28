@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-	namespace 'link.standen.michael.phonesaver'
+	namespace 'fjm.sh.filesaver'
 	// compileSdk is only the API level the code is compiled against. It is raised so that
 	// current AndroidX and Miuix XML can be built; it does not change runtime behaviour.
 	compileSdk 36
 
 	defaultConfig {
-		applicationId "link.standen.michael.phonesaver"
+		applicationId "fjm.sh.filesaver"
 		// API 21 is the minimum supported by current AndroidX (appcompat 1.7) and by
 		// Miuix XML after the API audit documented in README.md (previously 15).
 		minSdk 21
