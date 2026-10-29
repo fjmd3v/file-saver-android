@@ -9,7 +9,10 @@
 
 	<!-- Menu -->
 	<string name="action_settings">Settings</string>
-	<string name="action_support">Support the Developer</string>
+	<string name="action_github" translatable="false">fjmd3v</string>
+	<string name="action_github_description">Open fjmd3v on GitHub</string>
+	<string name="github_url" translatable="false">https://github.com/fjmd3v</string>
+	<string name="toast_no_browser">No app available to open %1$s</string>
 	<string name="action_change_log">Change Log</string>
 	<string name="action_credits">Credits</string>
 
@@ -148,9 +151,6 @@
 		<item>Verbose</item>
 	</array>
 
-	<string name="pref_title_hide_support">Hide support pop up</string>
-	<string name="pref_description_hide_support">Don\'t show the "support the developer" pop up.
-	</string>
 
 	<!-- Change log -->
 	<string name="changelog_full_title">Change Log</string>
@@ -158,21 +158,6 @@
 	<string name="changelog_ok_button">OK</string>
 	<string name="changelog_show_full">Show all&#8230;</string>
 
-	<!-- Support Dialog -->
-	<string name="support_header">Thank You!</string>
-	<string name="support_body1">As &appname; has grown and evolved, I\'ve realised that I\'m only
-		interested in saving images, and so I\'ve released a new app that focuses exclusively
-		on images.
-	</string>
-	<string name="support_body2">If this is of interest to you, or you wish to support &author; and
-		future development, please consider purchasing the new app.
-	</string>
-	<string name="support_link">
-		<a href="https://play.google.com/store/apps/details?id=link.standen.michael.imagesaver">
-			Image Saver on Google Play
-		</a>
-	</string>
-	<string name="support_footer">This message can be turned off in the settings.</string>
 
 	<!-- ===== Modernised UI (6.0) ===== -->
 	<string name="navigate_up">Navigate up</string>
@@ -224,9 +209,9 @@
 		<item>dark</item>
 	</array>
 	<string name="pref_default_value_theme" translatable="false">system</string>
-	<string name="pref_description_theme_system_unsupported">Android versions before 10 have no system dark theme, so "Follow system" uses the light theme.</string>
-	<string name="pref_title_dynamic_colors">Dynamic colours</string>
-	<string name="pref_description_dynamic_colors">Use colours from your wallpaper (Material You).</string>
+	<string name="pref_description_theme_system_unsupported">Android versions before 10 have no system dark theme, so \"Follow system\" uses the light theme.</string>
+	<string name="pref_title_dynamic_colors">Dynamic colors</string>
+	<string name="pref_description_dynamic_colors">Use colors from your wallpaper (Material You).</string>
 	<string name="pref_description_dynamic_colors_unavailable">Requires Android 12 or newer.</string>
 	<string name="pref_title_about">About &appname;</string>
 	<string name="pref_title_change_log">@string/action_change_log</string>
@@ -244,11 +229,24 @@
 	<!-- Overrides of Miuix XML default strings (the library ships Chinese only) -->
 	<string name="dialog_negative">Cancel</string>
 	<string name="dialog_positive">OK</string>
-	<string name="dialog_color_title">Colour</string>
-	<string name="dialog_color_message">Enter an 8 digit colour value</string>
+	<string name="dialog_color_title">Color</string>
+	<string name="dialog_color_message">Enter an 8 digit color value</string>
 	<string name="color_hue">Hue</string>
 	<string name="color_saturation">Saturation</string>
 	<string name="color_lightness">Lightness</string>
 	<string name="color_alpha">Opacity</string>
 
+	<!-- Save result notifications -->
+	<string name="notification_channel_name">Save results</string>
+	<string name="notification_channel_description">Shows whether a shared item was saved</string>
+	<string name="notification_saved_title">Saved</string>
+	<string name="notification_failed_title">Not saved</string>
+	<string name="notification_saved_to">Saved to %1$s</string>
+	<string name="notification_saved_file">%1$s saved to %2$s</string>
+	<string name="notification_failed_file">%1$s: %2$s</string>
+	<string name="notification_location_picker">the chosen location</string>
+	<plurals name="notification_saved_files">
+		<item quantity="one">%1$d item saved to %2$s</item>
+		<item quantity="other">%1$d items saved to %2$s</item>
+	</plurals>
 </resources>

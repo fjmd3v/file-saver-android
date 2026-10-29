@@ -103,4 +103,19 @@
 		<item>ライト</item>
 		<item>ダーク</item>
 	</array>
+
+	<!-- Save result notifications -->
+	<string name="action_github_description">GitHub で fjmd3v を開く</string>
+	<string name="toast_no_browser">%1$s を開けるアプリがありません</string>
+	<string name="notification_channel_name">保存結果</string>
+	<string name="notification_channel_description">共有したアイテムが保存されたかどうかを表示します</string>
+	<string name="notification_saved_title">保存しました</string>
+	<string name="notification_failed_title">保存できませんでした</string>
+	<string name="notification_saved_to">%1$s に保存しました</string>
+	<string name="notification_saved_file">%1$s を %2$s に保存しました</string>
+	<string name="notification_failed_file">%1$s: %2$s</string>
+	<string name="notification_location_picker">選択した場所</string>
+	<plurals name="notification_saved_files">
+		<item quantity="other">%1$d 件を %2$s に保存しました</item>
+	</plurals>
 </resources>

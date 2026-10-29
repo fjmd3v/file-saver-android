@@ -12,7 +12,7 @@ import com.hchen.himiuix.utils.MiuiSuperBlur
  * enough: the device may have blur turned off (battery saver, low-end hardware, "advanced
  * textures" disabled) in which case the app bar would become transparent. Blur is therefore
  * only allowed when the platform also reports cross-window blur as enabled (Android 12+).
- * Everywhere else Miuix XML falls back to a plain surface colour, so navigation never
+ * Everywhere else Miuix XML falls back to a plain surface color, so navigation never
  * depends on blur.
  */
 object BlurSupport {

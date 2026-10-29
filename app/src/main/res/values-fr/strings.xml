@@ -9,7 +9,6 @@
 
 	<!-- Menu -->
 	<string name="action_settings">Paramètres</string>
-	<string name="action_support">Soutenir le développeur</string>
 	<string name="action_change_log">Historique des changements</string>
 	<string name="action_credits">Crédits</string>
 
@@ -148,9 +147,6 @@
 		<item>Verbose</item>
 	</array>
 
-	<string name="pref_title_hide_support">Cacher le pop-up de soutien</string>
-	<string name="pref_description_hide_support">Ne pas afficher le pop-up de \"soutien au développeur\".
-	</string>
 
 	<!-- Change log -->
 	<string name="changelog_full_title">Historique des changements</string>
@@ -158,21 +154,6 @@
 	<string name="changelog_ok_button">OK</string>
 	<string name="changelog_show_full">Tout montrer&#8230;</string>
 
-	<!-- Support Dialog -->
-	<string name="support_header">Merci!</string>
-		<string name="support_body1">Avec l\'évolution de &appname;, je me suis rendu compte que
-		je suis seulement intéressé par la sauvegarde d\'image, j\'ai donc conçu et publié une application
-		qui fait exclusivement cela.
-	</string>
-	<string name="support_body2">Si cela vous intéresse ou si vous souhaitez soutenir &author;
-		et le futur développement, veuillez considérer l\'achat de la nouvelle application.
-	</string>
-	<string name="support_link">
-		<a href="https://play.google.com/store/apps/details?id=link.standen.michael.imagesaver">
-			Image Saver sur Google Play
-		</a>
-	</string>
-	<string name="support_footer">Ce message peut être désactivé dans les paramètres.</string>
 
 	<!-- ===== Modernised UI (6.0) ===== -->
 	<string name="navigate_up">Revenir en arrière</string>
@@ -228,4 +209,20 @@
 		<item>Clair</item>
 		<item>Sombre</item>
 	</array>
+
+	<!-- Save result notifications -->
+	<string name="action_github_description">Ouvrir fjmd3v sur GitHub</string>
+	<string name="toast_no_browser">Aucune application pour ouvrir %1$s</string>
+	<string name="notification_channel_name">Résultats d\'enregistrement</string>
+	<string name="notification_channel_description">Indique si un élément partagé a été enregistré</string>
+	<string name="notification_saved_title">Enregistré</string>
+	<string name="notification_failed_title">Non enregistré</string>
+	<string name="notification_saved_to">Enregistré dans %1$s</string>
+	<string name="notification_saved_file">%1$s enregistré dans %2$s</string>
+	<string name="notification_failed_file">%1$s : %2$s</string>
+	<string name="notification_location_picker">l\'emplacement choisi</string>
+	<plurals name="notification_saved_files">
+		<item quantity="one">%1$d élément enregistré dans %2$s</item>
+		<item quantity="other">%1$d éléments enregistrés dans %2$s</item>
+	</plurals>
 </resources>

@@ -13,7 +13,7 @@ import fjm.sh.filesaver.R
 import fjm.sh.filesaver.util.ThemeHelper
 
 /**
- * Common setup for the Miuix styled screens: dynamic colours, edge-to-edge drawing
+ * Common setup for the Miuix styled screens: dynamic colors, edge-to-edge drawing
  * (required by MiuixAppBar) and recreation when the appearance settings change.
  */
 abstract class BaseActivity : AppCompatActivity() {

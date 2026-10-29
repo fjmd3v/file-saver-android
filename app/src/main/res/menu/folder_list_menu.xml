@@ -8,9 +8,10 @@
 		android:title="@string/action_settings"
 		app:showAsAction="never" />
 	<item
-		android:id="@+id/action_support"
+		android:id="@+id/action_github"
+		android:icon="@drawable/fs_ic_github"
 		android:orderInCategory="125"
-		android:title="@string/action_support"
+		android:title="@string/action_github"
 		app:showAsAction="never" />
 	<item
 		android:id="@+id/action_change_log"

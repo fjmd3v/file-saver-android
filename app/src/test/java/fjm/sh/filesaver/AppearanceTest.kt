@@ -27,7 +27,7 @@ class AppearanceTest {
 
 	@Before
 	fun setUp() {
-		prefs.edit().clear().putBoolean("hide_support", true).commit()
+		prefs.edit().clear().commit()
 		de.cketti.library.changelog.ChangeLog(context).skipLogDialog()
 	}
 
@@ -58,7 +58,7 @@ class AppearanceTest {
 
 	@Test
 	@Config(sdk = [31, 34, 36])
-	fun dynamicColours_replaceAccentOnAndroid12() {
+	fun dynamicColors_replaceAccentOnAndroid12() {
 		val defaultAccent = accentOf(Robolectric.buildActivity(FolderListActivity::class.java).setup().get())
 		prefs.edit().putBoolean(ThemeHelper.PREF_DYNAMIC_COLORS, true).commit()
 		val dynamic = Robolectric.buildActivity(FolderListActivity::class.java).setup().get()
@@ -69,7 +69,7 @@ class AppearanceTest {
 
 	@Test
 	@Config(sdk = [28])
-	fun dynamicColours_ignoredBeforeAndroid12() {
+	fun dynamicColors_ignoredBeforeAndroid12() {
 		prefs.edit().putBoolean(ThemeHelper.PREF_DYNAMIC_COLORS, true).commit()
 		assertFalse(ThemeHelper.isDynamicColorEnabled(context))
 		val activity = Robolectric.buildActivity(FolderListActivity::class.java).setup().get()

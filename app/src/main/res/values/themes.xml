@@ -57,7 +57,7 @@
 		<item name="colorAccent">?attr/fsColorAccent</item>
 	</style>
 
-	<!-- Dynamic colour overlay. On API < 31 it is a no-op; see values-v31. -->
+	<!-- Dynamic color overlay. On API < 31 it is a no-op; see values-v31. -->
 	<style name="ThemeOverlay.FileSaver.DynamicColors" parent="" />
 
 	<style name="Widget.FileSaver.Toolbar" parent="Widget.AppCompat.Toolbar">

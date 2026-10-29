@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- Accent colours follow the Miuix XML palette (miuix_switch_on). They are only
-		 used through the ?attr/fsColorAccent family so dynamic colours can replace them. -->
+	<!-- Accent colors follow the Miuix XML palette (miuix_switch_on). They are only
+		 used through the ?attr/fsColorAccent family so dynamic colors can replace them. -->
 	<color name="fs_accent">#2F6EE8</color>
 	<color name="fs_on_accent">#FFFFFF</color>
 	<color name="fs_accent_container">#E6EFFF</color>
@@ -19,7 +19,7 @@
 	<color name="fs_disabled_text">#6E6E6E</color>
 
 
-	<!-- Overrides of Miuix XML colours for WCAG AA text contrast -->
+	<!-- Overrides of Miuix XML colors for WCAG AA text contrast -->
 	<color name="miuix_divider_color">#5F6584</color>
 	<color name="fs_link">@color/fs_accent</color>
 	<color name="fs_nav_bar_scrim">#B3F7F7F7</color>
