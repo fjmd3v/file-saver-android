@@ -27,6 +27,8 @@ Set up any number of locations on your mobile, and save to them with a single cl
 * Configure whether or not gallery and music apps are notified of saves
 * Choose from a range of duplicate file handling options
 * A notification with the result of every save (saved / not saved)
+* Create new folders while choosing a destination
+* If a destination folder was deleted or moved, you are asked to pick another one
 * Light and dark themes, with optional dynamic (Material You) colors on Android 12+
 * Automated bug reports for requesting support for file types
 

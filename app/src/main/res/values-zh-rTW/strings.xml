@@ -221,4 +221,19 @@
 	<plurals name="notification_saved_files">
 		<item quantity="other">已將 %1$d 個項目儲存至 %2$s</item>
 	</plurals>
+
+	<!-- New folder / missing destination -->
+	<string name="folder_select_new_folder">新增資料夾</string>
+	<string name="folder_select_new_folder_title">新增資料夾</string>
+	<string name="folder_select_new_folder_hint">資料夾名稱</string>
+	<string name="folder_select_new_folder_create">建立</string>
+	<string name="folder_select_new_folder_error_empty">請輸入資料夾名稱。</string>
+	<string name="folder_select_new_folder_error_invalid">資料夾名稱不能包含「/」，也不能是「.」或「..」。</string>
+	<string name="folder_select_new_folder_error_exists">已有相同名稱的資料夾或檔案。</string>
+	<string name="folder_select_new_folder_error_failed">無法在此建立資料夾。</string>
+	<string name="saver_missing_title">找不到資料夾</string>
+	<string name="saver_missing_body">%1$s 已被移動或刪除。請選擇其他資料夾來儲存。</string>
+	<string name="saver_missing_choose">其他儲存位置</string>
+	<string name="saver_choose_other_folder">選擇其他資料夾</string>
+	<string name="saver_folder_missing">%1$s · 找不到</string>
 </resources>

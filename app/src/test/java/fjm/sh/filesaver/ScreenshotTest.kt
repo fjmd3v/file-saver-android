@@ -113,6 +113,25 @@ class ScreenshotTest {
 		captureView(dialog.window!!.decorView, "07-confirm-dialog$suffix")
 
 		capture(Robolectric.buildActivity(CreditsActivity::class.java).setup().get(), "06-credits$suffix")
+
+		// New folder dialog
+		val picker = Robolectric.buildActivity(FolderSelectActivity::class.java).setup().get()
+		picker.findViewById<View>(R.id.new_folder).performClick()
+		org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(2))
+		captureView(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "08-new-folder-dialog$suffix")
+
+		// Share sheet when the destination was deleted
+		File(root(), "DCIM/Memes").deleteRecursively()
+		val missing = Robolectric.buildActivity(SaverActivity::class.java, Intent(share)
+			.putExtra(SaverActivity.DIRECT_SHARE_FOLDER, "/DCIM/Memes")).setup().get()
+		TestSupport.waitFor { missing.findViewById<View>(R.id.list).visibility == View.VISIBLE }
+		org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(2))
+		capture(missing, "09-missing-folder$suffix")
+
+		// Folder picker with dynamic colors (accent 3 "New folder" button)
+		prefs.edit().putBoolean("dynamic_colors", true).commit()
+		capture(Robolectric.buildActivity(FolderSelectActivity::class.java).setup().get(), "10-folder-select-dynamic$suffix")
+		prefs.edit().putBoolean("dynamic_colors", false).commit()
 	}
 
 	@Test

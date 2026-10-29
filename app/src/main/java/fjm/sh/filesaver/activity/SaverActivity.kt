@@ -47,6 +47,10 @@ class SaverActivity : BaseActivity() {
 
 		const val FILENAME_EXT_MATCH_LIMIT = 1000
 		const val DIRECT_SHARE_FOLDER = "DIRECT_SHARE_FOLDER"
+
+		private const val KEY_LOCATION_PREFIX = "location:"
+		private const val KEY_PICKER = "picker"
+		private const val KEY_MISSING = "missing"
 	}
 
 	val requestCodeLocationSelect = 1
@@ -79,7 +83,12 @@ class SaverActivity : BaseActivity() {
 		when {
 			directShareLocation != null -> {
 				location = LocationHelper.addRoot(directShareLocation)
-				useIntent({ finishIntent(it) })
+				if (isAvailable(location!!)) {
+					useIntent({ finishIntent(it) })
+				} else {
+					// The Direct Share folder was moved or deleted; let the user pick another
+					askForAnotherFolder(location!!)
+				}
 			}
 			PreferenceHelper.forceSaving -> loadList()
 			else -> {
@@ -159,7 +168,7 @@ class SaverActivity : BaseActivity() {
 	private fun destinationRow(location: String, position: Int): CardItem.Row =
 		if (PreferenceHelper.locationSelectEnabled && position == 0) {
 			CardItem.Row(
-				key = location,
+				key = KEY_LOCATION_PREFIX + position,
 				title = getString(R.string.location_select_title),
 				summary = getString(R.string.location_select_summary),
 				icon = R.drawable.fs_ic_document,
@@ -168,12 +177,104 @@ class SaverActivity : BaseActivity() {
 		} else {
 			val name = location.substringAfterLast(File.separatorChar)
 					.ifBlank { getString(R.string.folder_list_root_folder) }
+			val path = if (location.isBlank()) File.separator else location
+			val available = isAvailable(LocationHelper.addRoot(location))
 			CardItem.Row(
-				key = location,
+				key = KEY_LOCATION_PREFIX + position,
 				title = name,
-				summary = if (location.isBlank()) File.separator else location,
+				// Folders deleted or moved elsewhere cannot be chosen
+				summary = if (available) path else getString(R.string.saver_folder_missing, path),
+				clickable = available,
+				enabled = available,
 			)
 		}
+
+	/**
+	 * Whether a destination folder still exists. Destinations can be deleted or moved by other
+	 * apps after they were added; saving into a missing folder would fail.
+	 */
+	private fun isAvailable(absoluteLocation: String): Boolean = File(absoluteLocation).isDirectory
+
+	/**
+	 * Shows the destination list so the user can pick one.
+	 * @param locations Stored locations; the first is "location select" when that is enabled.
+	 * @param missingLocation A destination that no longer exists, explained at the top.
+	 */
+	private fun showDestinations(locations: List<String>, missingLocation: String? = null) {
+		runOnUiThread {
+			findViewById<View>(R.id.loading).visibility = View.GONE
+			// Init list view
+			val listView = findViewById<RecyclerView>(R.id.list)
+			listView.visibility = View.VISIBLE
+			listView.layoutManager = LinearLayoutManager(this)
+
+			val items = mutableListOf<CardItem>()
+			missingLocation?.let {
+				items.add(CardItem.Row(
+					key = KEY_MISSING,
+					title = getString(R.string.saver_missing_title),
+					summary = getString(R.string.saver_missing_body, displayPath(it)),
+					icon = R.drawable.fs_ic_error,
+					clickable = false,
+					danger = true,
+				))
+				items.add(CardItem.Header(getString(R.string.saver_missing_choose)))
+			}
+			locations.forEachIndexed { position, it -> items.add(destinationRow(it, position)) }
+			if (missingLocation != null && !PreferenceHelper.locationSelectEnabled) {
+				// Always offer the system picker, even if no other destination is available
+				items.add(CardItem.Row(
+					key = KEY_PICKER,
+					title = getString(R.string.saver_choose_other_folder),
+					summary = getString(R.string.location_select_summary),
+					icon = R.drawable.fs_ic_document,
+					showChevron = true,
+				))
+			}
+
+			var selected = false
+			listView.adapter = CardListAdapter(onRowClick = { row, _ ->
+				// Ignore repeated taps while the first selection is being saved
+				if (!selected) {
+					val position = row.key.removePrefix(KEY_LOCATION_PREFIX).toIntOrNull()
+					when {
+						row.key == KEY_PICKER -> {
+							// No location: the system file picker (location select) is used
+							location = null
+						}
+						position == null -> return@CardListAdapter
+						PreferenceHelper.locationSelectEnabled && position == 0 -> {
+							// The first item is the location select
+							location = null
+						}
+						else -> {
+							location = LocationHelper.addRoot(locations[position])
+							if (!isAvailable(location!!)) return@CardListAdapter
+						}
+					}
+					selected = true
+					useIntent({ finishIntent(it) })
+				}
+			}).apply {
+				this.items = items
+			}
+			listView.scrollToPosition(0)
+		}
+	}
+
+	/**
+	 * The destination that should have been used no longer exists: explain it and show the
+	 * remaining destinations and the system picker instead of failing.
+	 */
+	private fun askForAnotherFolder(missingAbsoluteLocation: String) {
+		log.w("Destination $missingAbsoluteLocation does not exist")
+		location = null
+		val locations = LocationHelper.loadFolderListWLocationSelect(this).orEmpty()
+		showDestinations(locations, missingLocation = missingAbsoluteLocation)
+	}
+
+	private fun displayPath(absoluteLocation: String): String =
+		LocationHelper.removeRoot(absoluteLocation).ifBlank { File.separator }
 
 	/**
 	 * Load the list of locations
@@ -183,27 +284,7 @@ class SaverActivity : BaseActivity() {
 
 			when {
 				locations.size > 1 -> {
-					runOnUiThread {
-						findViewById<View>(R.id.loading).visibility = View.GONE
-						// Init list view
-						val listView = findViewById<RecyclerView>(R.id.list)
-						listView.visibility = View.VISIBLE
-						listView.layoutManager = LinearLayoutManager(this)
-						var selected = false
-						listView.adapter = CardListAdapter(onRowClick = { _, position ->
-							// Ignore repeated taps while the first selection is being saved
-							if (!selected) {
-								selected = true
-								if (!PreferenceHelper.locationSelectEnabled || position != 0){
-									// The first item is the location select. Set location otherwise
-									location = LocationHelper.addRoot(locations[position])
-								}
-								useIntent({ finishIntent(it) })
-							}
-						}).apply {
-							items = locations.mapIndexed { position, it -> destinationRow(it, position) }
-						}
-					}
+					showDestinations(locations)
 					return // await selection
 				}
 				locations.size == 1 -> {
@@ -211,6 +292,11 @@ class SaverActivity : BaseActivity() {
 					if (!PreferenceHelper.locationSelectEnabled) {
 						// Only set location when not using location select
 						location = LocationHelper.addRoot(locations[0])
+						if (!isAvailable(location!!)) {
+							// The only destination was moved or deleted; let the user pick another
+							askForAnotherFolder(location!!)
+							return // await selection
+						}
 					}
 					useIntent({ finishIntent(it) })
 					return // activity dead
@@ -448,6 +534,10 @@ class SaverActivity : BaseActivity() {
 				} ?: callback(false)
 			} catch (e: FileNotFoundException) {
 				log.e("File not found. Perhaps you are overriding the same file and just deleted it?", e)
+				callback(false)
+			} catch (e: IOException) {
+				// e.g. the destination folder was deleted after it was checked
+				log.e("Unable to create file $destinationFilename", e)
 				callback(false)
 			}
 		}

@@ -225,4 +225,19 @@
 		<item quantity="one">%1$d élément enregistré dans %2$s</item>
 		<item quantity="other">%1$d éléments enregistrés dans %2$s</item>
 	</plurals>
+
+	<!-- New folder / missing destination -->
+	<string name="folder_select_new_folder">Nouveau dossier</string>
+	<string name="folder_select_new_folder_title">Nouveau dossier</string>
+	<string name="folder_select_new_folder_hint">Nom du dossier</string>
+	<string name="folder_select_new_folder_create">Créer</string>
+	<string name="folder_select_new_folder_error_empty">Saisissez un nom de dossier.</string>
+	<string name="folder_select_new_folder_error_invalid">Un nom de dossier ne peut pas contenir « / » ni être « . » ou « .. ».</string>
+	<string name="folder_select_new_folder_error_exists">Un dossier ou fichier portant ce nom existe déjà.</string>
+	<string name="folder_select_new_folder_error_failed">Impossible de créer le dossier ici.</string>
+	<string name="saver_missing_title">Dossier introuvable</string>
+	<string name="saver_missing_body">%1$s a été déplacé ou supprimé. Choisissez un autre dossier pour l\'enregistrement.</string>
+	<string name="saver_missing_choose">Autres emplacements</string>
+	<string name="saver_choose_other_folder">Choisir un autre dossier</string>
+	<string name="saver_folder_missing">%1$s · introuvable</string>
 </resources>

@@ -8,5 +8,8 @@
 		<item name="fsColorAccentContainer">@android:color/system_accent1_100</item>
 		<item name="fsColorOnAccentContainer">@android:color/system_accent1_700</item>
 		<item name="fsColorLink">@android:color/system_accent1_600</item>
+		<!-- System accent 3 (Material "tertiary container") for secondary actions -->
+		<item name="fsColorSecondaryActionContainer">@android:color/system_accent3_100</item>
+		<item name="fsColorOnSecondaryActionContainer">@android:color/system_accent3_900</item>
 	</style>
 </resources>
