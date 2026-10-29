@@ -1,10 +1,17 @@
 package fjm.sh.filesaver.activity
 
+import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.view.menu.MenuBuilder
+import androidx.core.view.MenuItemCompat
 import androidx.recyclerview.widget.RecyclerView
 import fjm.sh.filesaver.R
 import fjm.sh.filesaver.ui.CardItem
@@ -16,6 +23,7 @@ import fjm.sh.filesaver.util.DialogHelper
 import fjm.sh.filesaver.util.DirectShareHelper
 import fjm.sh.filesaver.util.LocationHelper
 import fjm.sh.filesaver.util.PreferenceHelper
+import fjm.sh.filesaver.util.SaveNotifier
 import java.io.File
 import java.util.Locale
 
@@ -52,6 +60,7 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 		val appBar = setUpAppBar(getString(R.string.app_name), showUp = false)
 		appBar.toolbar.inflateMenu(R.menu.folder_list_menu)
 		appBar.toolbar.setOnMenuItemClickListener { onOptionsItemSelected(it) }
+		showOverflowMenuIcons(appBar.toolbar.menu)
 
 		fab = findViewById(R.id.fab)
 		fab.setOnClickListener { openFolderSelect() }
@@ -62,13 +71,13 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 		// Check for permissions
 		testPermissions()
 
-		// Show the thanks dialog
-		preferenceHelper.loadPreferences()
-		if (!PreferenceHelper.hideSupport) {
-			DialogHelper.showSupportDialog(this)
-		}
+		// Save result notifications. On Android 13+ creating the channel while this screen is
+		// visible lets the system ask for the notification permission here, not while sharing.
+		SaveNotifier.createChannel(this)
 
-		// Show the change log over top of thanks
+		preferenceHelper.loadPreferences()
+
+		// Show the change log when there is something new
 		ChangeLogHelper.show(this, false)
 
 		// Keep Direct Share targets in sync for users upgrading from older versions
@@ -104,8 +113,8 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 				startActivity(Intent(this, SettingsActivity::class.java))
 				true
 			}
-			R.id.action_support -> {
-				DialogHelper.showSupportDialog(this)
+			R.id.action_github -> {
+				openGitHub()
 				true
 			}
 			R.id.action_change_log -> {
@@ -135,6 +144,30 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 					showFolderList()
 				}
 			}
+		}
+	}
+
+	/**
+	 * Overflow menus hide item icons by default; show them so the GitHub item has its logo.
+	 * Items without an icon are unaffected.
+	 */
+	@SuppressLint("RestrictedApi")
+	private fun showOverflowMenuIcons(menu: Menu) {
+		(menu as? MenuBuilder)?.setOptionalIconsVisible(true)
+		menu.findItem(R.id.action_github)?.let {
+			MenuItemCompat.setContentDescription(it, getString(R.string.action_github_description))
+		}
+	}
+
+	/**
+	 * Opens the fjmd3v GitHub profile in the browser.
+	 */
+	private fun openGitHub() {
+		val url = getString(R.string.github_url)
+		try {
+			startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+		} catch (e: ActivityNotFoundException) {
+			Toast.makeText(this, getString(R.string.toast_no_browser, url), Toast.LENGTH_LONG).show()
 		}
 	}
 

@@ -52,7 +52,7 @@ class SettingsActivity: BaseActivity() {
 					?.setSummary(R.string.pref_description_theme_system_unsupported)
 			}
 
-			// Dynamic colours only exist on Android 12+
+			// Dynamic colors only exist on Android 12+
 			findPreference<MiuixSwitchPreference>(ThemeHelper.PREF_DYNAMIC_COLORS)?.let {
 				if (!ThemeHelper.isDynamicColorAvailable) {
 					it.isEnabled = false
@@ -82,8 +82,12 @@ class SettingsActivity: BaseActivity() {
 
 		override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
 			when (key) {
-				// Recreates all activities with the new night mode
-				ThemeHelper.PREF_THEME -> ThemeHelper.applyNightMode(requireContext())
+				// Recreates all activities with the new night mode. Posted so the drop-down
+				// closes first instead of being torn down with the recreated activity.
+				ThemeHelper.PREF_THEME -> {
+					val context = requireContext().applicationContext
+					view?.post { ThemeHelper.applyNightMode(context) } ?: ThemeHelper.applyNightMode(context)
+				}
 				// Other activities recreate themselves on resume (BaseActivity)
 				ThemeHelper.PREF_DYNAMIC_COLORS -> activity?.recreate()
 			}

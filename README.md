@@ -26,7 +26,8 @@ Set up any number of locations on your mobile, and save to them with a single cl
 * Direct Share targets for your saved locations
 * Configure whether or not gallery and music apps are notified of saves
 * Choose from a range of duplicate file handling options
-* Light and dark themes, with optional dynamic (Material You) colours on Android 12+
+* A notification with the result of every save (saved / not saved)
+* Light and dark themes, with optional dynamic (Material You) colors on Android 12+
 * Automated bug reports for requesting support for file types
 
 ## Un-Features
@@ -49,7 +50,7 @@ Miuix XML components used:
 | All screens | `MiuixAppBar` (large collapsing title), `SpringBackLayout` (Miuix over-scroll), `MiuixRecyclerFillView` / `MiuixFillView`, `fragment.Fragment` / `fragment.PreferenceFragmentCompat` |
 | Destinations, share sheet, folder picker | `MiuixCardView` group cards, `ShadowHelper` press feedback, Miuix text / divider styles |
 | Settings | `MiuixPreferenceCategory`, `MiuixSwitchPreference`, `MiuixDropDownPreference`, `MiuixPreference` |
-| Dialogs | `MiuixAlertDialog` (support, change log, remove destination confirmation) |
+| Dialogs | `MiuixAlertDialog` (change log, remove destination confirmation) |
 
 Small app-side pieces follow the same design language where the library has no
 equivalent: the rounded "Add destination" button, the share destination bottom sheet and
@@ -73,7 +74,7 @@ The submodule is pinned to a specific commit, so builds are reproducible.
 Miuix XML can use Xiaomi's private View blur. Phone Saver only allows it when the device
 provides those methods **and** Android reports that blur is enabled
 (`WindowManager.isCrossWindowBlurEnabled()`, Android 12+). Everywhere else, including all
-non-Xiaomi devices, the app bar uses a plain surface colour. Navigation never depends on
+non-Xiaomi devices, the app bar uses a plain surface color. Navigation never depends on
 blur. See `util/BlurSupport.kt`.
 
 ### Motion

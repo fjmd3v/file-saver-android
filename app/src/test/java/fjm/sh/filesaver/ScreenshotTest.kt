@@ -41,7 +41,7 @@ class ScreenshotTest {
 		assumeTrue(System.getProperty("screenshotDir") != null)
 		outDir.mkdirs()
 		root().listFiles()?.forEach { it.deleteRecursively() }
-		prefs.edit().clear().putBoolean("hide_support", true).commit()
+		prefs.edit().clear().commit()
 		de.cketti.library.changelog.ChangeLog(context).skipLogDialog()
 	}
 
@@ -67,6 +67,16 @@ class ScreenshotTest {
 		File(outDir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
 	}
 
+	/** Captures the most recently added window (popups / drop-downs). */
+	private fun captureLatestWindow(name: String) {
+		val global = Class.forName("android.view.WindowManagerGlobal")
+		val instance = global.getMethod("getInstance").invoke(null)
+		val field = global.getDeclaredField("mViews").apply { isAccessible = true }
+		@Suppress("UNCHECKED_CAST")
+		val views = field.get(instance) as List<View>
+		captureView(views.last(), name)
+	}
+
 	private fun all(suffix: String) {
 		capture(Robolectric.buildActivity(FolderListActivity::class.java).setup().get(), "01-empty$suffix")
 
@@ -74,6 +84,13 @@ class ScreenshotTest {
 		capture(Robolectric.buildActivity(FolderListActivity::class.java).setup().get(), "02-destinations$suffix")
 
 		capture(Robolectric.buildActivity(SettingsActivity::class.java).setup().get(), "03-settings$suffix")
+
+		// Overflow menu (GitHub item)
+		val menuActivity = Robolectric.buildActivity(FolderListActivity::class.java).setup().get()
+		capture(menuActivity, "02b-menu-base$suffix")
+		menuActivity.findViewById<com.hchen.himiuix.MiuixAppBar>(R.id.appbar).toolbar.showOverflowMenu()
+		org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(1))
+		captureLatestWindow("02c-overflow-menu$suffix")
 
 		File(root(), "Alpha").mkdirs(); File(root(), "Movies").mkdirs(); File(root(), "Music").mkdirs()
 		capture(Robolectric.buildActivity(FolderSelectActivity::class.java).setup().get(), "04-folder-select$suffix")

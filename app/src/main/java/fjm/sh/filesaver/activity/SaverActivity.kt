@@ -29,6 +29,7 @@ import fjm.sh.filesaver.ui.CardItem
 import fjm.sh.filesaver.ui.CardListAdapter
 import fjm.sh.filesaver.util.DirectShareHelper
 import fjm.sh.filesaver.util.PreferenceHelper
+import fjm.sh.filesaver.util.SaveNotifier
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.Locale
@@ -57,6 +58,9 @@ class SaverActivity : BaseActivity() {
 	var convertedMime: String? = null
 
 	var debugInfo: MutableList<Pair> = mutableListOf()
+
+	/** Names of the files being saved, for the result notification. */
+	private val savedFileNames: MutableList<String> = java.util.Collections.synchronizedList(mutableListOf())
 
 	lateinit var returnFromActivityResult: (uri: Uri?) -> Unit
 
@@ -330,6 +334,15 @@ class SaverActivity : BaseActivity() {
 			}
 		}
 
+		// Result notification. In progress (null) means DownloadManager is saving a URL;
+		// DownloadBroadcastReceiver posts the result when the download completes.
+		val names = savedFileNames.toList()
+		when {
+			success == null -> Unit
+			success && messageId == null -> SaveNotifier.notifySaved(applicationContext, names, location)
+			else -> SaveNotifier.notifyFailed(applicationContext, messageId?.let { getString(it) }, names)
+		}
+
 		exitApplication()
 	}
 
@@ -588,6 +601,9 @@ class SaverActivity : BaseActivity() {
 			}
 		}
 
+		if (!dryRun) {
+			savedFileNames.add(result)
+		}
 		callback(result)
 	}
 

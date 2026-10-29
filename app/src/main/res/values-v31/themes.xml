@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- Monet / Material You colours, only applied when the user enables
-		 "Dynamic colours" in Settings (see ThemeHelper). -->
+	<!-- Monet / Material You colors, only applied when the user enables
+		 "Dynamic colors" in Settings (see ThemeHelper). -->
 	<style name="ThemeOverlay.FileSaver.DynamicColors" parent="">
 		<item name="fsColorAccent">@android:color/system_accent1_600</item>
 		<item name="fsColorOnAccent">@android:color/system_accent1_0</item>

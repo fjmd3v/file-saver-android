@@ -206,4 +206,19 @@
 		<item>淺色</item>
 		<item>深色</item>
 	</array>
+
+	<!-- Save result notifications -->
+	<string name="action_github_description">在 GitHub 上開啟 fjmd3v</string>
+	<string name="toast_no_browser">沒有可開啟 %1$s 的應用程式</string>
+	<string name="notification_channel_name">儲存結果</string>
+	<string name="notification_channel_description">顯示分享的項目是否已儲存</string>
+	<string name="notification_saved_title">已儲存</string>
+	<string name="notification_failed_title">未儲存</string>
+	<string name="notification_saved_to">已儲存至 %1$s</string>
+	<string name="notification_saved_file">已將 %1$s 儲存至 %2$s</string>
+	<string name="notification_failed_file">%1$s：%2$s</string>
+	<string name="notification_location_picker">所選位置</string>
+	<plurals name="notification_saved_files">
+		<item quantity="other">已將 %1$d 個項目儲存至 %2$s</item>
+	</plurals>
 </resources>

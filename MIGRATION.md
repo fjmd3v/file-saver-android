@@ -52,7 +52,7 @@ Dependency changes:
   | `Parcel#readBoolean/writeBoolean` | 29 | int encoding |
   | `Activity#registerActivityLifecycleCallbacks` | 29 | `Application` callbacks filtered to the activity |
   | `LayerDrawable#setDrawable` | 23 | `setDrawableByLayerId` fallback |
-  | `GradientDrawable#getColor` | 24 | version check, default colour |
+  | `GradientDrawable#getColor` | 24 | version check, default color |
   | `SeekBar#setMin/getMin` | 26 | `setMinCompat` (minimum fixed at 0 below 26) |
   | `HapticFeedbackConstants.CONTEXT_CLICK` | 23 | `VIRTUAL_KEY` below 23 |
   | `ImageView#setImageIcon`, `autofill()` | 23 / 26 | `@RequiresApi` (framework only calls autofill on 26+) |
@@ -75,6 +75,8 @@ made while integrating (all on the same library branch):
 * `MiuiSuperBlur.setBlurAllowed()` / `isBlurAvailable()`: lets the app disable blur.
 * `WindowInsetsHelper`: still runs the DecorView default inset handling.
 * Dialog buttons are no longer all-caps.
+* Drop-down and list dialog options respond to real taps (rows forwarded touch events to a
+  small check box with the wrong coordinates, so any finger movement cancelled the tap).
 
 App-side handling of library behaviour:
 
@@ -82,10 +84,10 @@ App-side handling of library behaviour:
   `ListPreference` stored the entry *value* ("Overwrite", "Debug", …) and the saving code
   reads that. `util/SettingsDataStore.kt` converts in both directions so existing settings
   are read and written in the original format.
-* **Chinese-only library strings** (dialog buttons, colour picker) are overridden in the
+* **Chinese-only library strings** (dialog buttons, color picker) are overridden in the
   app, with translations for the app's locales.
-* **Accent colours** of library widgets are redirected (API 31+) to `?attr/fsColorAccent`,
-  so dynamic colours also apply to switches, dialogs and lists.
+* **Accent colors** of library widgets are redirected (API 31+) to `?attr/fsColorAccent`,
+  so dynamic colors also apply to switches, dialogs and lists.
 
 ## UI changes
 
@@ -93,15 +95,24 @@ App-side handling of library behaviour:
   icons, folder name + full path, delete button with confirmation dialog, extended
   "Add destination" button, empty-state card, rounded overflow menu.
 * Settings: grouped Miuix preference cards (Saving, Links, Appearance, Advanced, About),
-  new **Theme** (follow system / light / dark) and **Dynamic colours** (Android 12+ only;
+  new **Theme** (follow system / light / dark) and **Dynamic colors** (Android 12+ only;
   disabled with an explanation elsewhere).
 * Share target: a bottom sheet over the sharing app instead of a full-screen list; shows
   what is being shared; tap outside or Cancel to close. One destination still saves
   immediately without showing a choice.
 * Folder picker: Miuix list with current folder card, parent folder row, sorted folders,
   "Save here" / read-only button.
-* About, Support and Change log: Miuix screens/dialogs. ckChangeLog still tracks the last
-  seen version, so "What's New" still appears once after upgrading.
+* About and Change log: Miuix screens/dialogs. ckChangeLog still tracks the last seen
+  version, so "What's New" still appears once after upgrading.
+* The "support the developer" pop up and its "Hide support pop up" setting were removed.
+  A stored `hide_support` value from older versions is simply ignored. The overflow menu
+  item is replaced by a GitHub item ("fjmd3v") that opens https://github.com/fjmd3v.
+* Dark theme backgrounds use #131313 instead of pure black.
+* Save result notifications: after a share is saved (or fails) a notification shows the
+  file name and folder, or the reason it failed (channel "Save results"). URL downloads
+  report when DownloadManager finishes. Because the app targets API 28, Android 13+ asks
+  for the notification permission automatically the first time the app is opened; if it is
+  denied only the toasts are shown.
 
 ## Manifest
 
@@ -125,7 +136,7 @@ emulator could be run (no KVM), so **no test was run on a physical or emulated d
 | `lintDebug` | 0 errors, 9 warnings (pre-existing: deprecated ChooserTargetService, `ObsoleteSdkInt` checks in unchanged saving code, `scheduleAtFixedRate` in DebugLogger) |
 | Miuix XML lint `NewApi`/`InlinedApi` at minSdk 21 | No issues |
 | APK `aapt2 dump badging` | applicationId unchanged, versionCode 37, versionName 6.0.0, minSdk 21, **targetSdk 28** |
-| Robolectric unit tests | 244 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
+| Robolectric unit tests | 316 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
 | Visual review | Screens rendered with Robolectric native graphics (light + dark) and reviewed; found and fixed a sheet layout bug |
 
 Robolectric coverage (see `app/src/test`):
@@ -140,7 +151,7 @@ Robolectric coverage (see `app/src/test`):
 | Duplicate filename / overwrite | Overwrite, do not save, append number |
 | Automatic saving | Single destination saves without the selector |
 | Direct Share | `DIRECT_SHARE_FOLDER` extra and sharing shortcut id |
-| Dark / light mode, dynamic colours | Night qualifier inflation, theme mapping, Monet accent on 31+, ignored on 28 |
+| Dark / light mode, dynamic colors | Night qualifier inflation, theme mapping, Monet accent on 31+, ignored on 28 |
 | Accessibility | Miuix switch row reports checkable/checked/Switch class |
 
 Not covered by automated tests (requires devices):
@@ -164,9 +175,9 @@ Not covered by automated tests (requires devices):
   writable regardless of target SDK; use "location select" for SD cards.
 * "Follow system" theme has no effect before Android 10 (no system dark theme); the app
   uses the light theme there and says so in Settings.
-* Dynamic colours require Android 12.
+* Dynamic colors require Android 12.
 * Xiaomi blur is only enabled when the platform reports blur as enabled (Android 12+);
-  on older HyperOS/MIUI builds the app bar uses a solid surface colour.
+  on older HyperOS/MIUI builds the app bar uses a solid surface color.
 * Sharing shortcuts may also be shown by some launchers when long-pressing the app icon;
   launching one opens the app.
 * Miuix XML seek bars cannot have a minimum other than 0 below API 26 (not used here).

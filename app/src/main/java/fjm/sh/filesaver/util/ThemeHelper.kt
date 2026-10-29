@@ -8,7 +8,7 @@ import androidx.preference.PreferenceManager
 import fjm.sh.filesaver.R
 
 /**
- * Appearance settings: light / dark / follow system, and optional dynamic (Monet) colours.
+ * Appearance settings: light / dark / follow system, and optional dynamic (Monet) colors.
  */
 object ThemeHelper {
 
@@ -19,7 +19,7 @@ object ThemeHelper {
 	private const val THEME_DARK = "dark"
 
 	/**
-	 * Dynamic colours need the Android 12 system palette (@android:color/system_accent1_*).
+	 * Dynamic colors need the Android 12 system palette (@android:color/system_accent1_*).
 	 */
 	val isDynamicColorAvailable: Boolean
 		get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -58,7 +58,7 @@ object ThemeHelper {
 	}
 
 	/**
-	 * Identifies the colour configuration an activity was created with, so that activities
+	 * Identifies the color configuration an activity was created with, so that activities
 	 * in the back stack can be recreated after the user changes it.
 	 */
 	fun signature(context: Context): String = "dynamic=${isDynamicColorEnabled(context)}"

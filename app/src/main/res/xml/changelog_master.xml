@@ -2,7 +2,7 @@
 <changelog>
 	<release version="6.0.0" versioncode="37">
 		<change>New HyperOS-inspired design built with Miuix XML</change>
-		<change>Light and dark themes, plus optional dynamic colours on Android 12+</change>
+		<change>Light and dark themes, plus optional dynamic colors on Android 12+</change>
 		<change>Grouped settings and a quicker share destination sheet</change>
 		<change>Direct Share on Android 10 and newer</change>
 		<change>Confirmation before removing a destination</change>

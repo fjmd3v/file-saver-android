@@ -34,10 +34,7 @@ class FolderListActivityTest {
 	@Before
 	fun setUp() {
 		root().listFiles()?.forEach { it.deleteRecursively() }
-		prefs.edit().clear()
-			// Do not stack the support / change log dialogs over the tests
-			.putBoolean("hide_support", true)
-			.commit()
+		prefs.edit().clear().commit()
 		// Mark the change log as seen
 		de.cketti.library.changelog.ChangeLog(context).skipLogDialog()
 	}
@@ -123,6 +120,27 @@ class FolderListActivityTest {
 	}
 
 	@Test
+	fun launch_showsNoSupportPopup() {
+		launch()
+		assertEquals(null, ShadowDialog.getLatestDialog())
+	}
+
+	@Test
+	fun githubMenuItem_opensProfile() {
+		val activity = launch()
+		val toolbar = activity.findViewById<com.hchen.himiuix.MiuixAppBar>(R.id.appbar).toolbar
+		assertEquals(null, toolbar.menu.findItem(context.resources.getIdentifier("action_support", "id", context.packageName)))
+		val item = toolbar.menu.findItem(R.id.action_github)
+		assertEquals("fjmd3v", item.title.toString())
+		assertNotNull(item.icon)
+
+		activity.onOptionsItemSelected(item)
+		val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
+		assertEquals(Intent.ACTION_VIEW, started.action)
+		assertEquals("https://github.com/fjmd3v", started.dataString)
+	}
+
+	@Test
 	fun addButton_opensFolderSelect() {
 		setDestinations("/A")
 		val activity = launch()
@@ -140,6 +158,8 @@ class FolderListActivityTest {
 		assertTrue(activity.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
 				android.content.res.Configuration.UI_MODE_NIGHT_YES)
 		assertEquals(2, items(activity).size)
+		// Dark backgrounds are #131313, not pure black
+		assertEquals(0xFF131313.toInt(), androidx.core.content.ContextCompat.getColor(activity, R.color.fs_window_background))
 	}
 
 	private fun findViewWithText(view: View, text: String): View? {

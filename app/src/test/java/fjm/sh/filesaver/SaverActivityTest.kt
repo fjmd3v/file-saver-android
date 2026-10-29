@@ -75,6 +75,57 @@ class SaverActivityTest {
 		assertTrue(waitFor { controller.get().isFinishing })
 	}
 
+	private fun notifications() =
+		shadowOf(context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager)
+			.allNotifications
+
+	private fun android.app.Notification.title() = extras.getCharSequence(android.app.Notification.EXTRA_TITLE).toString()
+	private fun android.app.Notification.text() = extras.getCharSequence(android.app.Notification.EXTRA_TEXT).toString()
+
+	@Test
+	fun successfulSave_postsResultNotification() {
+		setDestinations("/Saved")
+		launch(textIntent("hello world"))
+		assertTrue(waitFor { notifications().isNotEmpty() })
+
+		val notification = notifications().single()
+		assertEquals(context.getString(R.string.notification_saved_title), notification.title())
+		assertEquals("helloworld.txt saved to /Saved", notification.text())
+	}
+
+	@Test
+	fun failedSave_postsResultNotificationWithReason() {
+		setDestinations("/Saved")
+		File(root(), "Saved/helloworld.txt").writeText("old")
+		prefs.edit().putString("file_exists", "Nothing").commit()
+		launch(textIntent("hello world"))
+		assertTrue(waitFor { notifications().isNotEmpty() })
+
+		val notification = notifications().single()
+		assertEquals(context.getString(R.string.notification_failed_title), notification.title())
+		assertEquals(context.getString(R.string.toast_save_file_exists_fail), notification.text())
+	}
+
+	@Test
+	fun multipleFiles_postOneNotification() {
+		setDestinations("/Batch")
+		val intent = Intent(context, SaverActivity::class.java)
+			.setAction(Intent.ACTION_SEND_MULTIPLE)
+			.setType("image/*")
+			.putParcelableArrayListExtra(Intent.EXTRA_STREAM, arrayListOf(
+				sourceFile("a.jpg", "1"), sourceFile("b.jpg", "2")))
+		launch(intent)
+		assertTrue(waitFor { notifications().isNotEmpty() })
+		assertEquals("2 items saved to /Batch", notifications().single().text())
+	}
+
+	@Test
+	fun completedDownload_postsResultNotification() {
+		fjm.sh.filesaver.receiver.DownloadBroadcastReceiver()
+			.onReceive(context, Intent(android.app.DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+		assertEquals(context.getString(R.string.notification_saved_title), notifications().single().title())
+	}
+
 	@Test
 	fun multipleDestinations_showsSelector_andSavesToChosenFolder() {
 		setDestinations("/A", "/B")

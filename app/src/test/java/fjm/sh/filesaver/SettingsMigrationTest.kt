@@ -44,6 +44,7 @@ class SettingsMigrationTest {
 			.putBoolean("follow_redirects", false)
 			.putBoolean("force_saving", true)
 			.putBoolean("special_imgur", true)
+			// Setting of the removed support pop up: ignored, but left untouched
 			.putBoolean("hide_support", true)
 			.commit()
 	}
@@ -98,7 +99,7 @@ class SettingsMigrationTest {
 		assertEquals("4", fragment.findPreference<MiuixDropDownPreference>("log_to_user")!!.value)
 		assertTrue(fragment.findPreference<MiuixSwitchPreference>("location_select")!!.isChecked)
 		assertFalse(fragment.findPreference<MiuixSwitchPreference>("follow_redirects")!!.isChecked)
-		assertTrue(fragment.findPreference<MiuixSwitchPreference>("hide_support")!!.isChecked)
+		assertNull("support pop up setting removed", fragment.findPreference<MiuixSwitchPreference>("hide_support"))
 
 		assertEquals("showing settings must not rewrite stored values", before, prefs.all.toMap())
 
@@ -111,7 +112,6 @@ class SettingsMigrationTest {
 		assertFalse(PreferenceHelper.followRedirects)
 		assertTrue(PreferenceHelper.forceSaving)
 		assertTrue(PreferenceHelper.specialImgur)
-		assertTrue(PreferenceHelper.hideSupport)
 	}
 
 	@Test
@@ -133,7 +133,7 @@ class SettingsMigrationTest {
 
 	@Test
 	@Config(sdk = [28])
-	fun dynamicColours_disabledBeforeAndroid12() {
+	fun dynamicColors_disabledBeforeAndroid12() {
 		val activity = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
 		TestSupport.idle()
 		val dynamic = settingsFragment(activity).findPreference<MiuixSwitchPreference>("dynamic_colors")!!
@@ -142,7 +142,7 @@ class SettingsMigrationTest {
 
 	@Test
 	@Config(sdk = [31, 36])
-	fun dynamicColours_availableOnAndroid12() {
+	fun dynamicColors_availableOnAndroid12() {
 		val activity = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
 		TestSupport.idle()
 		val dynamic = settingsFragment(activity).findPreference<MiuixSwitchPreference>("dynamic_colors")!!
