@@ -49,3 +49,4 @@ jobs:
           path: app/build/outputs/apk/debug/${{ env.APK_NAME }}
           if-no-files-found: error
           retention-days: 90
+          archive: false
