@@ -151,7 +151,7 @@ emulator could be run (no KVM), so **no test was run on a physical or emulated d
 | `lintDebug` | 0 errors, 9 warnings (pre-existing: deprecated ChooserTargetService, `ObsoleteSdkInt` checks in unchanged saving code, `scheduleAtFixedRate` in DebugLogger) |
 | Miuix XML lint `NewApi`/`InlinedApi` at minSdk 21 | No issues |
 | APK `aapt2 dump badging` | applicationId unchanged, versionCode 37, versionName 6.0.0, minSdk 21, **targetSdk 28** |
-| Robolectric unit tests | 368 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
+| Robolectric unit tests | 418 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
 | Visual review | Screens rendered with Robolectric native graphics (light + dark) and reviewed; found and fixed a sheet layout bug |
 
 Robolectric coverage (see `app/src/test`):
