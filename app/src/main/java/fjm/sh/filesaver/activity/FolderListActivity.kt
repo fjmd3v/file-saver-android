@@ -8,11 +8,14 @@ import android.net.Uri
 import android.os.Build
 import android.view.Menu
 import android.view.MenuItem
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.view.MenuItemCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.hchen.himiuix.springback.SpringBackLayout
 import fjm.sh.filesaver.R
 import fjm.sh.filesaver.ui.CardItem
 import fjm.sh.filesaver.ui.CardListAdapter
@@ -25,7 +28,6 @@ import fjm.sh.filesaver.util.LocationHelper
 import fjm.sh.filesaver.util.PreferenceHelper
 import fjm.sh.filesaver.util.SaveNotifier
 import java.io.File
-import java.util.Locale
 
 /**
  * The entry point activity.
@@ -46,10 +48,95 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 
 	private val preferenceHelper = PreferenceHelper(this)
 
-	private val adapter = CardListAdapter(
+	private val adapter: CardListAdapter = CardListAdapter(
 		onRowAction = { row, _ -> confirmDelete(row.key) },
 		onMessageAction = { openFolderSelect() },
+		onStartDrag = { holder -> itemTouchHelper.startDrag(holder) },
+		onMoveBy = { row, delta -> moveDestination(row.key, delta) },
 	)
+
+	/**
+	 * Drag and drop reordering of the destinations. The order is saved when the row is dropped
+	 * and is the order used by the share sheet (and the Direct Share ranking).
+	 */
+	private val itemTouchHelper: ItemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+		private var springBack: SpringBackLayout? = null
+
+		private fun isDraggable(holder: RecyclerView.ViewHolder) =
+			(adapter.items.getOrNull(holder.bindingAdapterPosition) as? CardItem.Row)?.draggable == true
+
+		override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
+			if (isDraggable(viewHolder)) makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) else 0
+
+		// Drags are started from the handle or by long-pressing a row (CardListAdapter)
+		override fun isLongPressDragEnabled() = false
+
+		override fun isItemViewSwipeEnabled() = false
+
+		override fun canDropOver(recyclerView: RecyclerView, current: RecyclerView.ViewHolder,
+								 target: RecyclerView.ViewHolder) = isDraggable(target)
+
+		override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
+							target: RecyclerView.ViewHolder): Boolean {
+			adapter.moveItem(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+			return true
+		}
+
+		override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+		override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+			super.onSelectedChanged(viewHolder, actionState)
+			if (actionState == ItemTouchHelper.ACTION_STATE_DRAG && viewHolder != null) {
+				viewHolder.itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+				// Keep the Miuix over-scroll from taking over the drag gesture
+				springBack = findSpringBack(viewHolder.itemView)
+				springBack?.setSpringBackEnable(false)
+			}
+		}
+
+		override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+			super.clearView(recyclerView, viewHolder)
+			springBack?.setSpringBackEnable(true)
+			springBack = null
+			saveDisplayedOrder()
+		}
+	})
+
+	private fun findSpringBack(view: View): SpringBackLayout? {
+		var parent = view.parent
+		while (parent != null && parent !is SpringBackLayout) parent = parent.parent
+		return parent as? SpringBackLayout
+	}
+
+	/**
+	 * Saves the order currently shown in the list (after a drag).
+	 */
+	private fun saveDisplayedOrder() {
+		val ordered = adapter.items.filterIsInstance<CardItem.Row>().filter { it.draggable }.map { it.key }
+		if (ordered != folderList) {
+			folderList.clear()
+			folderList.addAll(ordered)
+			LocationHelper.saveFolderList(this, folderList)
+		}
+		// Rebind so the rounded group corners follow the new order
+		listView?.post { adapter.refreshAfterDrag() }
+	}
+
+	/**
+	 * Moves a destination one place up (-1) or down (+1), for accessibility services.
+	 */
+	private fun moveDestination(folder: String, delta: Int) {
+		val from = folderList.indexOf(folder)
+		val to = from + delta
+		if (from < 0 || to !in folderList.indices) return
+		folderList.add(to, folderList.removeAt(from))
+		LocationHelper.saveFolderList(this, folderList)
+		showFolderList()
+		listView?.announceForAccessibility(getString(R.string.folder_list_moved_announcement,
+			displayName(folder), to + 1, folderList.size))
+	}
+
+	private var listView: RecyclerView? = null
 
 	private lateinit var fab: View
 
@@ -85,7 +172,9 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 	}
 
 	override fun onListViewCreated(recyclerView: RecyclerView) {
+		listView = recyclerView
 		recyclerView.adapter = adapter
+		itemTouchHelper.attachToRecyclerView(recyclerView)
 	}
 
 	override fun onResume() {
@@ -136,10 +225,9 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 			if (requestCode == FOLDER_SELECT_REQUEST_CODE) {
 				val selected = data.getStringExtra(FolderSelectActivity.FOLDER_SELECTED) ?: return
 				val folder = LocationHelper.removeRoot(selected)
-				// Don't add duplicates
+				// Don't add duplicates. New destinations go to the end so a custom order is kept.
 				if (!folderList.contains(folder)) {
 					folderList.add(folder)
-					folderList.sortBy { it.lowercase(Locale.getDefault()) }
 					LocationHelper.saveFolderList(this, folderList)
 					showFolderList()
 				}
@@ -219,6 +307,7 @@ class FolderListActivity : BaseActivity(), MiuixListFragment.Host {
 				clickable = false,
 				actionIcon = R.drawable.fs_ic_delete,
 				actionDescription = getString(R.string.folder_list_delete_description, name),
+				draggable = true,
 			))
 		}
 		adapter.items = items

@@ -85,12 +85,24 @@
 			android:id="@+id/action"
 			android:layout_width="@dimen/fs_touch_target"
 			android:layout_height="@dimen/fs_touch_target"
-			android:layout_marginEnd="-8dp"
+			android:layout_marginEnd="0dp"
 			android:background="@drawable/fs_icon_button_background"
 			android:scaleType="center"
 			android:visibility="gone"
 			app:srcCompat="@drawable/fs_ic_delete"
 			tools:ignore="ContentDescription"
+			tools:visibility="visible" />
+
+		<!-- Reordering handle; screen readers use the "Move up / down" actions instead -->
+		<ImageView
+			android:id="@+id/drag_handle"
+			android:layout_width="@dimen/fs_touch_target"
+			android:layout_height="@dimen/fs_touch_target"
+			android:layout_marginEnd="-12dp"
+			android:importantForAccessibility="no"
+			android:scaleType="center"
+			android:visibility="gone"
+			app:srcCompat="@drawable/fs_ic_drag_handle"
 			tools:visibility="visible" />
 	</LinearLayout>
 </com.hchen.himiuix.widget.MiuixCardView>

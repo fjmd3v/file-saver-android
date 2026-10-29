@@ -17,6 +17,7 @@ import fjm.sh.filesaver.ui.CardItem
 import fjm.sh.filesaver.ui.CardListAdapter
 import fjm.sh.filesaver.util.LocationHelper
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -82,16 +83,134 @@ class FolderListActivityTest {
 
 	@Test
 	@Suppress("DEPRECATION")
-	fun folderSelectResult_addsSortedWithoutDuplicates() {
-		setDestinations("/b", "/d")
+	fun folderSelectResult_appendsWithoutDuplicates_keepingCustomOrder() {
+		setDestinations("/d", "/b")
 		val activity = launch()
 
 		val data = Intent().putExtra(FolderSelectActivity.FOLDER_SELECTED, LocationHelper.rootLocation + "/C")
 		activity.onActivityResult(FolderListActivity.FOLDER_SELECT_REQUEST_CODE, Activity.RESULT_OK, data)
 		activity.onActivityResult(FolderListActivity.FOLDER_SELECT_REQUEST_CODE, Activity.RESULT_OK, data)
 
-		assertEquals(listOf("/b", "/C", "/d"), LocationHelper.loadFolderList(context))
-		assertEquals(listOf("/b", "/C", "/d"), items(activity).filterIsInstance<CardItem.Row>().map { it.key })
+		assertEquals(listOf("/d", "/b", "/C"), LocationHelper.loadFolderList(context))
+		assertEquals(listOf("/d", "/b", "/C"), items(activity).filterIsInstance<CardItem.Row>().map { it.key })
+	}
+
+	private fun laidOutList(activity: FolderListActivity): RecyclerView {
+		val list = activity.findViewById<RecyclerView>(R.id.list)
+		list.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+			View.MeasureSpec.makeMeasureSpec(4000, View.MeasureSpec.EXACTLY))
+		list.layout(0, 0, 1080, 4000)
+		return list
+	}
+
+	private fun touch(view: View, action: Int, x: Float, y: Float, downTime: Long) {
+		val event = android.view.MotionEvent.obtain(downTime, android.os.SystemClock.uptimeMillis(), action, x, y, 0)
+		view.dispatchTouchEvent(event)
+		event.recycle()
+	}
+
+	private fun itemTouchHelper(activity: FolderListActivity): androidx.recyclerview.widget.ItemTouchHelper =
+		FolderListActivity::class.java.getDeclaredField("itemTouchHelper").apply { isAccessible = true }
+			.get(activity) as androidx.recyclerview.widget.ItemTouchHelper
+
+	private fun helperField(helper: androidx.recyclerview.widget.ItemTouchHelper, name: String): Any? =
+		androidx.recyclerview.widget.ItemTouchHelper::class.java.getDeclaredField(name)
+			.apply { isAccessible = true }.get(helper)
+
+	@Test
+	@Config(qualifiers = "w411dp-h1600dp")
+	fun dragHandle_startsDrag() {
+		setDestinations("/A", "/B")
+		val activity = launch()
+		val list = activity.findViewById<RecyclerView>(R.id.list)
+		val holder = list.findViewHolderForAdapterPosition(1)!!
+		val handle = holder.itemView.findViewById<View>(R.id.drag_handle)
+		assertEquals(View.VISIBLE, handle.visibility)
+
+		val handleLocation = IntArray(2).also { handle.getLocationInWindow(it) }
+		val listLocation = IntArray(2).also { list.getLocationInWindow(it) }
+		val x = (handleLocation[0] - listLocation[0] + handle.width / 2).toFloat()
+		val y = (handleLocation[1] - listLocation[1] + handle.height / 2).toFloat()
+		val down = android.os.SystemClock.uptimeMillis()
+		touch(list, android.view.MotionEvent.ACTION_DOWN, x, y, down)
+		val helper = itemTouchHelper(activity)
+		assertEquals("touching the handle starts dragging that row", holder, helperField(helper, "mSelected"))
+
+		// Cancel before running the looper: Robolectric does not pace ItemTouchHelper's frames
+		touch(list, android.view.MotionEvent.ACTION_CANCEL, x, y, down)
+		assertEquals(null, helperField(helper, "mSelected"))
+	}
+
+	@Test
+	@Config(qualifiers = "w411dp-h1600dp")
+	fun drag_reordersDestinations_andSavesOrderOnDrop() {
+		setDestinations("/A", "/B", "/C")
+		prefs.edit().putBoolean("location_select", true).commit()
+		val activity = launch()
+		val list = activity.findViewById<RecyclerView>(R.id.list)
+		val callback = helperField(itemTouchHelper(activity), "mCallback")
+			as androidx.recyclerview.widget.ItemTouchHelper.Callback
+		fun holder(position: Int) = list.findViewHolderForAdapterPosition(position)!!
+
+		// 0 header, 1 location select, 2..4 destinations
+		assertEquals(0, callback.getMovementFlags(list, holder(0)))
+		assertEquals("location select row stays first", 0, callback.getMovementFlags(list, holder(1)))
+		assertTrue(callback.getMovementFlags(list, holder(2)) != 0)
+		assertFalse("cannot drop above location select", callback.canDropOver(list, holder(2), holder(1)))
+
+		// Drag "/A" down two places, then drop
+		assertTrue(callback.onMove(list, holder(2), holder(3)))
+		TestSupport.idle()
+		assertTrue(callback.onMove(list, holder(3), holder(4)))
+		TestSupport.idle()
+		assertEquals("not saved before the drop", listOf("/A", "/B", "/C"), LocationHelper.loadFolderList(context))
+		callback.clearView(list, holder(4))
+		TestSupport.idle()
+
+		assertEquals(listOf("/B", "/C", "/A"), LocationHelper.loadFolderList(context))
+		assertEquals(listOf("location_select", "/B", "/C", "/A"),
+			items(activity).filterIsInstance<CardItem.Row>().map { it.key })
+	}
+
+	@Test
+	fun accessibilityActions_moveDestinationsUpAndDown() {
+		setDestinations("/A", "/B", "/C")
+		val activity = launch()
+		val list = laidOutList(activity)
+
+		fun actionsOf(position: Int): List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> {
+			val row = list.findViewHolderForAdapterPosition(position)!!.itemView.findViewById<View>(R.id.row)
+			val info = android.view.accessibility.AccessibilityNodeInfo.obtain()
+			row.onInitializeAccessibilityNodeInfo(info)
+			return info.actionList
+		}
+		fun perform(position: Int, label: Int) {
+			val row = list.findViewHolderForAdapterPosition(position)!!.itemView.findViewById<View>(R.id.row)
+			val action = actionsOf(position).first { it.label == context.getString(label) }
+			assertTrue(row.performAccessibilityAction(action.id, null))
+			TestSupport.idle()
+			laidOutList(activity)
+		}
+
+		val labels = { position: Int -> actionsOf(position).mapNotNull { it.label?.toString() } }
+		// First destination can only move down, last only up
+		assertFalse(labels(1).contains(context.getString(R.string.folder_list_move_up)))
+		assertTrue(labels(1).contains(context.getString(R.string.folder_list_move_down)))
+		assertFalse(labels(3).contains(context.getString(R.string.folder_list_move_down)))
+
+		perform(1, R.string.folder_list_move_down)
+		assertEquals(listOf("/B", "/A", "/C"), LocationHelper.loadFolderList(context))
+		perform(3, R.string.folder_list_move_up)
+		assertEquals(listOf("/B", "/C", "/A"), LocationHelper.loadFolderList(context))
+	}
+
+	@Test
+	fun locationSelectRow_isNotReorderable() {
+		setDestinations("/A", "/B")
+		prefs.edit().putBoolean("location_select", true).commit()
+		val rows = items(launch()).filterIsInstance<CardItem.Row>()
+		assertFalse(rows[0].draggable)
+		assertTrue(rows.drop(1).all { it.draggable })
 	}
 
 	@Test
