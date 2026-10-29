@@ -108,6 +108,15 @@ App-side handling of library behaviour:
   A stored `hide_support` value from older versions is simply ignored. The overflow menu
   item is replaced by a GitHub item ("fjmd3v") that opens https://github.com/fjmd3v.
 * Dark theme backgrounds use #131313 instead of pure black.
+* Folder picker: "New folder" button (left of "Save here") creates a folder in the current
+  folder and opens it. Names that are empty, contain "/", are "." / "..", or already exist
+  are rejected in the dialog. Disabled in read-only folders. Uses System Accent 3 (tonal)
+  when dynamic colors are on, the Miuix blue tonal style otherwise.
+* Missing destinations: saving to a destination folder that was deleted or moved used to
+  crash (`IOException` from `File.createNewFile`). The share sheet now checks the folder
+  first and, if it is gone, explains it and lets the user pick another destination or the
+  system file picker. Missing destinations are shown disabled in the list. Direct Share
+  targets pointing at a missing folder behave the same way.
 * Save result notifications: after a share is saved (or fails) a notification shows the
   file name and folder, or the reason it failed (channel "Save results"). URL downloads
   report when DownloadManager finishes. Because the app targets API 28, Android 13+ asks
@@ -136,7 +145,7 @@ emulator could be run (no KVM), so **no test was run on a physical or emulated d
 | `lintDebug` | 0 errors, 9 warnings (pre-existing: deprecated ChooserTargetService, `ObsoleteSdkInt` checks in unchanged saving code, `scheduleAtFixedRate` in DebugLogger) |
 | Miuix XML lint `NewApi`/`InlinedApi` at minSdk 21 | No issues |
 | APK `aapt2 dump badging` | applicationId unchanged, versionCode 37, versionName 6.0.0, minSdk 21, **targetSdk 28** |
-| Robolectric unit tests | 316 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
+| Robolectric unit tests | 368 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
 | Visual review | Screens rendered with Robolectric native graphics (light + dark) and reviewed; found and fixed a sheet layout bug |
 
 Robolectric coverage (see `app/src/test`):

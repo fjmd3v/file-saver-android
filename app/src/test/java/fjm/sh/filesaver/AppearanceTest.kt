@@ -64,6 +64,10 @@ class AppearanceTest {
 		val dynamic = Robolectric.buildActivity(FolderListActivity::class.java).setup().get()
 
 		assertEquals(dynamic.getColor(android.R.color.system_accent1_600), accentOf(dynamic))
+		// The "New folder" button uses system accent 3
+		val secondary = TypedValue()
+		assertTrue(dynamic.theme.resolveAttribute(R.attr.fsColorSecondaryActionContainer, secondary, true))
+		assertEquals(dynamic.getColor(android.R.color.system_accent3_100), secondary.data)
 		assertNotEquals(defaultAccent, accentOf(dynamic))
 	}
 

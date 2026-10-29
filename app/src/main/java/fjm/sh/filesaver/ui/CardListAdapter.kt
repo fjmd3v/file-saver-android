@@ -1,6 +1,9 @@
 package fjm.sh.filesaver.ui
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
+import android.text.TextUtils
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +12,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.hchen.himiuix.helper.ShadowHelper
 import com.hchen.himiuix.widget.MiuixCardView
@@ -39,6 +44,10 @@ sealed class CardItem {
 		val actionIcon: Int = 0,
 		val actionDescription: CharSequence? = null,
 		val clickDescription: CharSequence? = null,
+		/** Shown dimmed and announced as disabled, e.g. a destination that no longer exists. */
+		val enabled: Boolean = true,
+		/** Warning style (red icon), used for error notices. */
+		val danger: Boolean = false,
 	) : CardItem()
 
 	/** An informational card, used for empty states. */
@@ -133,6 +142,7 @@ class CardListAdapter(
 	private inner class RowHolder(view: View) : RecyclerView.ViewHolder(view) {
 		private val card = view as MiuixCardView
 		private val row = view.findViewById<View>(R.id.row)
+		private val iconTile = view.findViewById<View>(R.id.icon_tile)
 		private val icon = view.findViewById<ImageView>(R.id.icon)
 		private val title = view.findViewById<TextView>(R.id.title)
 		private val summary = view.findViewById<TextView>(R.id.summary)
@@ -167,6 +177,23 @@ class CardListAdapter(
 			summary.text = item.summary
 			summary.visibility = if (item.summary.isNullOrEmpty()) View.GONE else View.VISIBLE
 			chevron.visibility = if (item.showChevron) View.VISIBLE else View.GONE
+
+			// Disabled rows are dimmed; screen readers announce them as disabled
+			row.isEnabled = item.enabled
+			// Dim the content only, so the card background stays solid
+			val alpha = if (item.enabled) 1f else 0.45f
+			for (i in 0 until (row as ViewGroup).childCount) row.getChildAt(i).alpha = alpha
+			iconTile.setBackgroundResource(if (item.danger) R.drawable.fs_icon_tile_danger else R.drawable.fs_icon_tile)
+			ImageViewCompat.setImageTintList(icon, if (item.danger) {
+				ColorStateList.valueOf(ContextCompat.getColor(icon.context, R.color.fs_danger))
+			} else {
+				val value = TypedValue()
+				icon.context.theme.resolveAttribute(R.attr.fsColorOnAccentContainer, value, true)
+				ColorStateList.valueOf(value.data)
+			})
+			// Notices need their full text; paths are kept short
+			summary.maxLines = if (item.danger) 4 else 2
+			summary.ellipsize = if (item.danger) TextUtils.TruncateAt.END else TextUtils.TruncateAt.MIDDLE
 
 			row.isClickable = item.clickable
 			row.isFocusable = item.clickable

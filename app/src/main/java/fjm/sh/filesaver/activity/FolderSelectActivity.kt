@@ -1,12 +1,19 @@
 package fjm.sh.filesaver.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.hchen.himiuix.MiuixAppBar
+import com.hchen.himiuix.dialog.MiuixAlertDialog
+import com.hchen.himiuix.widget.MiuixEditText
 import java.io.File
 import fjm.sh.filesaver.R.*
 import fjm.sh.filesaver.ui.CardItem
@@ -73,6 +80,7 @@ class FolderSelectActivity : BaseActivity(), MiuixListFragment.Host {
 			setResult(RESULT_OK, intent)
 			finish()
 		}
+		findViewById<View>(id.new_folder).setOnClickListener { showNewFolderDialog() }
 		applyBottomInset(findViewById(id.navigation), asMargin = false)
 
 		/**
@@ -179,6 +187,75 @@ class FolderSelectActivity : BaseActivity(), MiuixListFragment.Host {
 	private fun updateWritable(writable: Boolean){
 		findViewById<View>(id.navigation_here).visibility = if (writable) View.VISIBLE else View.GONE
 		findViewById<View>(id.navigation_read_only).visibility = if (writable) View.GONE else View.VISIBLE
+		// Folders can only be created where the app can write
+		findViewById<View>(id.new_folder).isEnabled = writable
+	}
+
+	/**
+	 * Asks for a name and creates a new folder inside the current folder, then opens it.
+	 */
+	@SuppressLint("InflateParams")
+	private fun showNewFolderDialog() {
+		val view = layoutInflater.inflate(layout.fs_dialog_new_folder, null)
+		val nameField = view.findViewById<MiuixEditText>(id.new_folder_name)
+		val error = view.findViewById<TextView>(id.new_folder_error)
+		nameField.setHint(string.folder_select_new_folder_hint)
+		nameField.setAutoRequestFocus(true)
+		nameField.getInnerEditText().apply {
+			contentDescription = getString(string.folder_select_new_folder_hint)
+			setSingleLine(true)
+			imeOptions = EditorInfo.IME_ACTION_DONE
+		}
+		nameField.addTextChangedListener(object : TextWatcher {
+			override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+			override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+			override fun afterTextChanged(s: Editable?) {
+				error.visibility = View.GONE
+			}
+		})
+
+		MiuixAlertDialog(this)
+			.setTitle(getString(string.folder_select_new_folder_title))
+			.setCustomView(view)
+			// Keep the dialog open while the name is invalid
+			.setAutoDismiss(false)
+			.setNegativeButton(getString(string.dialog_negative)) { dialog, _ -> dialog.dismiss() }
+			.setPositiveButton(getString(string.folder_select_new_folder_create)) { dialog, _ ->
+				when (val result = createFolder(nameField.text?.toString().orEmpty())) {
+					null -> dialog.dismiss()
+					else -> {
+						error.text = getString(result)
+						error.visibility = View.VISIBLE
+					}
+				}
+			}
+			.show()
+	}
+
+	/**
+	 * Creates [name] in the current folder and opens it.
+	 * @return null on success, otherwise the message explaining the problem.
+	 */
+	private fun createFolder(name: String): Int? {
+		val trimmed = name.trim()
+		val folder = File(currentPath, trimmed)
+		return when {
+			trimmed.isEmpty() -> string.folder_select_new_folder_error_empty
+			trimmed == "." || trimmed == ".." || trimmed.contains(File.separatorChar) || trimmed.contains('\u0000') ->
+				string.folder_select_new_folder_error_invalid
+			folder.exists() -> string.folder_select_new_folder_error_exists
+			!folder.mkdir() -> {
+				log.w("Unable to create folder ${folder.absolutePath}")
+				string.folder_select_new_folder_error_failed
+			}
+			else -> {
+				log.i("Created folder ${folder.absolutePath}")
+				currentPath = folder.absolutePath
+				updateListView()
+				listView?.scrollToPosition(0)
+				null
+			}
+		}
 	}
 
 	/**

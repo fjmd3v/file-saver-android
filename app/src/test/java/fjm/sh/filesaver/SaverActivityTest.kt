@@ -126,6 +126,80 @@ class SaverActivityTest {
 		assertEquals(context.getString(R.string.notification_saved_title), notifications().single().title())
 	}
 
+	private fun rows(activity: SaverActivity) =
+		(activity.findViewById<RecyclerView>(R.id.list).adapter as fjm.sh.filesaver.ui.CardListAdapter)
+			.items.filterIsInstance<fjm.sh.filesaver.ui.CardItem.Row>()
+
+	private fun clickRow(activity: SaverActivity, title: String) {
+		val list = activity.findViewById<RecyclerView>(R.id.list)
+		val adapter = list.adapter as fjm.sh.filesaver.ui.CardListAdapter
+		val position = adapter.items.indexOfFirst { it is fjm.sh.filesaver.ui.CardItem.Row && it.title == title }
+		list.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+			View.MeasureSpec.makeMeasureSpec(4000, View.MeasureSpec.AT_MOST))
+		list.layout(0, 0, 1080, list.measuredHeight)
+		// The sheet list is height-limited; bring the row on screen like a user would
+		list.scrollToPosition(position)
+		list.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+			View.MeasureSpec.makeMeasureSpec(4000, View.MeasureSpec.AT_MOST))
+		list.layout(0, 0, 1080, list.measuredHeight)
+		list.findViewHolderForAdapterPosition(position)!!.itemView.findViewById<View>(R.id.row).performClick()
+	}
+
+	@Test
+	fun missingSingleDestination_asksForAnotherFolderInsteadOfCrashing() {
+		setDestinations("/Gone")
+		File(root(), "Gone").deleteRecursively()
+		val activity = launch(streamIntent("image/jpeg", sourceFile("photo.jpg", "x"))).get()
+
+		assertTrue(waitFor { activity.findViewById<View>(R.id.list).visibility == View.VISIBLE })
+		assertFalse(activity.isFinishing)
+		val rows = rows(activity)
+		assertEquals(context.getString(R.string.saver_missing_title), rows[0].title)
+		assertTrue(rows[0].danger)
+		// The missing destination is shown but cannot be chosen
+		assertFalse(rows.first { it.title == "Gone" }.enabled)
+		// The system picker is always offered
+		assertTrue(rows.any { it.title == context.getString(R.string.saver_choose_other_folder) })
+		assertFalse(File(root(), "Gone").exists())
+	}
+
+	@Test
+	fun missingDestination_anotherFolderCanBeChosen() {
+		setDestinations("/Gone", "/Ok")
+		File(root(), "Gone").deleteRecursively()
+		val activity = launch(textIntent("other folder")).get()
+
+		assertTrue(waitFor { activity.findViewById<View>(R.id.list).visibility == View.VISIBLE })
+		assertFalse(rows(activity).first { it.title == "Gone" }.clickable)
+		clickRow(activity, "Ok")
+		assertTrue(waitFor { File(root(), "Ok/otherfolder.txt").length() > 0 })
+	}
+
+	@Test
+	fun missingDirectShareFolder_asksForAnotherFolder() {
+		setDestinations("/Gone", "/Ok")
+		File(root(), "Gone").deleteRecursively()
+		val activity = launch(textIntent("direct").putExtra(SaverActivity.DIRECT_SHARE_FOLDER, "/Gone")).get()
+
+		assertTrue(waitFor { activity.findViewById<View>(R.id.list).visibility == View.VISIBLE })
+		assertEquals(context.getString(R.string.saver_missing_title), rows(activity)[0].title)
+		clickRow(activity, "Ok")
+		assertTrue(waitFor { File(root(), "Ok/direct.txt").length() > 0 })
+	}
+
+	@Test
+	@Suppress("DEPRECATION")
+	fun missingDestination_systemPickerCanBeChosen() {
+		setDestinations("/Gone")
+		File(root(), "Gone").deleteRecursively()
+		val activity = launch(textIntent("picked")).get()
+		assertTrue(waitFor { activity.findViewById<View>(R.id.list).visibility == View.VISIBLE })
+
+		clickRow(activity, context.getString(R.string.saver_choose_other_folder))
+		assertTrue(waitFor { shadowOf(activity).peekNextStartedActivityForResult() != null })
+		assertEquals(Intent.ACTION_CREATE_DOCUMENT, shadowOf(activity).nextStartedActivityForResult.intent.action)
+	}
+
 	@Test
 	fun multipleDestinations_showsSelector_andSavesToChosenFolder() {
 		setDestinations("/A", "/B")

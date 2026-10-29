@@ -7,4 +7,7 @@
 	<attr name="fsColorAccentContainer" format="color" />
 	<attr name="fsColorOnAccentContainer" format="color" />
 	<attr name="fsColorLink" format="color" />
+	<!-- Secondary action buttons (e.g. "New folder"). Accent 3 with dynamic colors. -->
+	<attr name="fsColorSecondaryActionContainer" format="color" />
+	<attr name="fsColorOnSecondaryActionContainer" format="color" />
 </resources>

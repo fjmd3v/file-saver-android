@@ -7,6 +7,8 @@
 		<item name="fsColorAccentContainer">@color/fs_accent_container</item>
 		<item name="fsColorOnAccentContainer">@color/fs_on_accent_container</item>
 		<item name="fsColorLink">@color/fs_link</item>
+		<item name="fsColorSecondaryActionContainer">@color/fs_accent_container</item>
+		<item name="fsColorOnSecondaryActionContainer">@color/fs_on_accent_container</item>
 
 		<item name="colorPrimary">?attr/fsColorAccent</item>
 		<item name="colorPrimaryDark">@color/fs_window_background</item>
