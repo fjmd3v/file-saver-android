@@ -12,7 +12,7 @@ verified, and the known limitations.
 | `applicationId link.standen.michael.phonesaver` | Kept (verified in APK). |
 | No Jetpack Compose | Views/XML only. |
 | Storage architecture | Unchanged `java.io` + `DownloadManager` + SAF "location select". No `MANAGE_EXTERNAL_STORAGE`. |
-| Destination data | Same `FOLDER_STORE` JSON file, same format, same sorting on add. |
+| Destination data | Same `FOLDER_STORE` JSON file and format. The list order is the user's order (see "Reordering" below). |
 | Preferences | Same keys, value formats and defaults. Nothing is written just by opening Settings. |
 | Share intents | `ACTION_SEND` / `ACTION_SEND_MULTIPLE` with `*/*`, unchanged handling, automatic save with one destination. |
 
@@ -108,6 +108,12 @@ App-side handling of library behaviour:
   A stored `hide_support` value from older versions is simply ignored. The overflow menu
   item is replaced by a GitHub item ("fjmd3v") that opens https://github.com/fjmd3v.
 * Dark theme backgrounds use #131313 instead of pure black.
+* Reordering: destinations on the main screen can be reordered by dragging the handle on
+  the right of each row (or long-pressing the row). Screen reader / switch access users get
+  "Move up" / "Move down" actions. The order is saved in the existing `FOLDER_STORE` list,
+  so the share sheet and Direct Share use it. "Choose location when saving" stays first.
+  New destinations are now added at the end instead of re-sorting the list alphabetically
+  (which would undo a custom order); existing lists keep their current order.
 * Folder picker: "New folder" button (left of "Save here") creates a folder in the current
   folder and opens it. Names that are empty, contain "/", are "." / "..", or already exist
   are rejected in the dialog. Disabled in read-only folders. Uses System Accent 3 (tonal)
@@ -145,7 +151,7 @@ emulator could be run (no KVM), so **no test was run on a physical or emulated d
 | `lintDebug` | 0 errors, 9 warnings (pre-existing: deprecated ChooserTargetService, `ObsoleteSdkInt` checks in unchanged saving code, `scheduleAtFixedRate` in DebugLogger) |
 | Miuix XML lint `NewApi`/`InlinedApi` at minSdk 21 | No issues |
 | APK `aapt2 dump badging` | applicationId unchanged, versionCode 37, versionName 6.0.0, minSdk 21, **targetSdk 28** |
-| Robolectric unit tests | 368 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
+| Robolectric unit tests | 418 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 |
 | Visual review | Screens rendered with Robolectric native graphics (light + dark) and reviewed; found and fixed a sheet layout bug |
 
 Robolectric coverage (see `app/src/test`):

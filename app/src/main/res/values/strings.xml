@@ -264,4 +264,9 @@
 	<string name="saver_missing_choose">Other destinations</string>
 	<string name="saver_choose_other_folder">Choose another folder</string>
 	<string name="saver_folder_missing">%1$s · not found</string>
+
+	<!-- Reordering destinations -->
+	<string name="folder_list_move_up">Move up</string>
+	<string name="folder_list_move_down">Move down</string>
+	<string name="folder_list_moved_announcement">%1$s moved to position %2$d of %3$d</string>
 </resources>

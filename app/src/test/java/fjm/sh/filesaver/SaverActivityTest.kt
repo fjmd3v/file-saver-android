@@ -146,6 +146,14 @@ class SaverActivityTest {
 	}
 
 	@Test
+	fun shareSheet_followsTheOrderSetOnTheMainScreen() {
+		setDestinations("/Zeta", "/Alpha", "/Mid")
+		val activity = launch(textIntent("order")).get()
+		assertTrue(waitFor { activity.findViewById<View>(R.id.list).visibility == View.VISIBLE })
+		assertEquals(listOf("Zeta", "Alpha", "Mid"), rows(activity).map { it.title.toString() })
+	}
+
+	@Test
 	fun missingSingleDestination_asksForAnotherFolderInsteadOfCrashing() {
 		setDestinations("/Gone")
 		File(root(), "Gone").deleteRecursively()

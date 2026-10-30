@@ -48,6 +48,8 @@ sealed class CardItem {
 		val enabled: Boolean = true,
 		/** Warning style (red icon), used for error notices. */
 		val danger: Boolean = false,
+		/** Can be reordered: shows a drag handle and "Move up / down" accessibility actions. */
+		val draggable: Boolean = false,
 	) : CardItem()
 
 	/** An informational card, used for empty states. */
@@ -66,6 +68,10 @@ class CardListAdapter(
 	private val onRowClick: (CardItem.Row, Int) -> Unit = { _, _ -> },
 	private val onRowAction: (CardItem.Row, Int) -> Unit = { _, _ -> },
 	private val onMessageAction: () -> Unit = {},
+	/** Called when the user starts dragging a [CardItem.Row.draggable] row. */
+	private val onStartDrag: (RecyclerView.ViewHolder) -> Unit = {},
+	/** Accessibility "Move up" (-1) / "Move down" (+1) for draggable rows. */
+	private val onMoveBy: (CardItem.Row, Int) -> Unit = { _, _ -> },
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 	companion object {
@@ -77,10 +83,24 @@ class CardListAdapter(
 	var items: List<CardItem> = emptyList()
 		@SuppressLint("NotifyDataSetChanged")
 		set(value) {
-			field = value
+			field = value.toMutableList()
 			// Lists are short; group corner radii depend on neighbours, so rebind everything.
 			notifyDataSetChanged()
 		}
+
+	/**
+	 * Moves an item while it is being dragged. Corner radii are refreshed by
+	 * [refreshAfterDrag] when the drag ends.
+	 */
+	fun moveItem(from: Int, to: Int) {
+		val list = items as MutableList<CardItem>
+		list.add(to, list.removeAt(from))
+		notifyItemMoved(from, to)
+	}
+
+	/** Rebinds all rows so that the group corners match the new order. */
+	@SuppressLint("NotifyDataSetChanged")
+	fun refreshAfterDrag() = notifyDataSetChanged()
 
 	override fun getItemCount(): Int = items.size
 
@@ -148,6 +168,7 @@ class CardListAdapter(
 		private val summary = view.findViewById<TextView>(R.id.summary)
 		private val chevron = view.findViewById<View>(R.id.chevron)
 		private val action = view.findViewById<ImageButton>(R.id.action)
+		private val dragHandle = view.findViewById<View>(R.id.drag_handle)
 		private val radius = view.resources.getDimension(MiuixR.dimen.miuix_prefs_card_radius)
 
 		// Miuix press feedback (background darkens/lightens like Miuix preferences)
@@ -169,6 +190,40 @@ class CardListAdapter(
 				val position = bindingAdapterPosition
 				(items.getOrNull(position) as? CardItem.Row)?.let { onRowAction(it, position) }
 			}
+			// Drag immediately from the handle, or long-press anywhere on the row
+			@SuppressLint("ClickableViewAccessibility")
+			dragHandle.setOnTouchListener { _, event ->
+				if (event.actionMasked == android.view.MotionEvent.ACTION_DOWN && isDraggable()) {
+					onStartDrag(this)
+				}
+				false
+			}
+			row.setOnLongClickListener {
+				if (isDraggable()) {
+					onStartDrag(this)
+					true
+				} else false
+			}
+		}
+
+		private fun isDraggable() = (items.getOrNull(bindingAdapterPosition) as? CardItem.Row)?.draggable == true
+
+		private val moveActionIds = mutableListOf<Int>()
+
+		/** "Move up" / "Move down" for screen reader and switch access users. */
+		private fun bindMoveActions(item: CardItem.Row, position: Int) {
+			moveActionIds.forEach { ViewCompat.removeAccessibilityAction(row, it) }
+			moveActionIds.clear()
+			if (!item.draggable) return
+			val context = row.context
+			fun add(label: Int, delta: Int) {
+				moveActionIds.add(ViewCompat.addAccessibilityAction(row, context.getString(label)) { _, _ ->
+					(items.getOrNull(bindingAdapterPosition) as? CardItem.Row)?.let { onMoveBy(it, delta) }
+					true
+				})
+			}
+			if ((items.getOrNull(position - 1) as? CardItem.Row)?.draggable == true) add(R.string.folder_list_move_up, -1)
+			if ((items.getOrNull(position + 1) as? CardItem.Row)?.draggable == true) add(R.string.folder_list_move_down, 1)
 		}
 
 		fun bind(item: CardItem.Row, position: Int) {
@@ -177,6 +232,9 @@ class CardListAdapter(
 			summary.text = item.summary
 			summary.visibility = if (item.summary.isNullOrEmpty()) View.GONE else View.VISIBLE
 			chevron.visibility = if (item.showChevron) View.VISIBLE else View.GONE
+			dragHandle.visibility = if (item.draggable) View.VISIBLE else View.GONE
+			row.isLongClickable = item.draggable
+			bindMoveActions(item, position)
 
 			// Disabled rows are dimmed; screen readers announce them as disabled
 			row.isEnabled = item.enabled

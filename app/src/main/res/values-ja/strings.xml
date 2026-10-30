@@ -133,4 +133,9 @@
 	<string name="saver_missing_choose">その他の保存先</string>
 	<string name="saver_choose_other_folder">別のフォルダを選択</string>
 	<string name="saver_folder_missing">%1$s · 見つかりません</string>
+
+	<!-- Reordering destinations -->
+	<string name="folder_list_move_up">上へ移動</string>
+	<string name="folder_list_move_down">下へ移動</string>
+	<string name="folder_list_moved_announcement">%1$s を %3$d 件中 %2$d 番目に移動しました</string>
 </resources>
