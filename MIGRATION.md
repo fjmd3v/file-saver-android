@@ -1,15 +1,20 @@
 # 6.0 migration summary
 
 This document records what changed when Phone Saver was modernised with
-[Miuix XML](https://github.com/fjmd3v/miuix-xml), what was deliberately kept, how it was
+[Miuix XML](https://github.com/fjmsh/miuix-xml), what was deliberately kept, how it was
 verified, and the known limitations.
+
+> The app was later renamed **DropFiler** and moved to the application ID
+> `fjm.sh.dropfiler`, and "Open with" support was added. See
+> [DropFiler rename and "Open with"](#dropfiler-rename-and-open-with) at the end. The 6.0
+> sections below are kept as a historical record (the `fjmd3v` account is now `fjmsh`).
 
 ## Non-negotiables (kept)
 
 | Requirement | Status |
 | --- | --- |
 | `targetSdkVersion 28` | Kept. Verified in the built APK with `aapt2 dump badging` (`targetSdkVersion:'28'`). |
-| `applicationId link.standen.michael.phonesaver` | Kept (verified in APK). |
+| `applicationId link.standen.michael.phonesaver` | Kept in 6.0 (verified in APK). Changed later for DropFiler, see below. |
 | No Jetpack Compose | Views/XML only. |
 | Storage architecture | Unchanged `java.io` + `DownloadManager` + SAF "location select". No `MANAGE_EXTERNAL_STORAGE`. |
 | Destination data | Same `FOLDER_STORE` JSON file and format. The list order is the user's order (see "Reordering" below). |
@@ -196,3 +201,72 @@ Not covered by automated tests (requires devices):
 * Sharing shortcuts may also be shown by some launchers when long-pressing the app icon;
   launching one opens the app.
 * Miuix XML seek bars cannot have a minimum other than 0 below API 26 (not used here).
+
+## DropFiler rename and "Open with"
+
+The app is now **DropFiler**, a separately branded fork of Phone Saver by Michael Standen
+(ScreamingHawk). Original attribution and the MIT `LICENSE` are kept; Miuix XML (LGPL 2.1)
+is credited unchanged.
+
+| | Before | After |
+| --- | --- | --- |
+| Display name | Phone Saver | DropFiler (all locales) |
+| `applicationId` / `namespace` | `fjm.sh.filesaver` (earlier `link.standen.michael.phonesaver`) | `fjm.sh.dropfiler` |
+| Kotlin package | `fjm.sh.filesaver.*` | `fjm.sh.dropfiler.*` (same subpackages) |
+| Application class | `FileSaverApplication` | `DropFilerApplication` |
+| Settings fragment | `SettingsActivity$PhoneSaverPreferenceFragment` | `SettingsActivity$DropFilerPreferenceFragment` |
+| Sharing shortcut category | `fjm.sh.filesaver.category.SAVE_TO_FOLDER` | `fjm.sh.dropfiler.category.SAVE_TO_FOLDER` |
+| GitHub menu item | fjmd3v | fjmsh (https://github.com/fjmsh) |
+| "Unsupported content" feature request link | ScreamingHawk/phone-saver issues | this repository's issues (`@string/issues_new_url`) |
+| Miuix XML submodule URL | github.com/fjmd3v/miuix-xml | github.com/fjmsh/miuix-xml (same pinned commit) |
+| Gradle root project | `phone-saver` | `DropFiler-Android` |
+| CI debug APK name | `phone-saver-<version>-debug-<run>.apk` | `dropfiler-<version>-debug-<run>.apk` |
+
+Unchanged: `minSdk 21`, **`targetSdk 28`**, `compileSdk 36`, versionCode 37 /
+versionName 6.0.0, AGP/Gradle/Kotlin and all dependencies, signing configuration, the
+storage implementation, preference keys and the `FOLDER_STORE` format. Internal style
+resource names (`Theme.FileSaver`, `Widget.FileSaver.*`) are not user visible and were
+kept to avoid churn.
+
+Because the application ID changed, DropFiler installs as a **new app** next to Phone
+Saver; destinations and settings are not migrated.
+
+### "Open with" (`ACTION_VIEW`)
+
+`SaverActivity` has a separate `ACTION_VIEW` filter (`DEFAULT` category, `content` and
+`file` schemes, `*/*`). No `BROWSABLE`, no http(s), no `EDIT` / `GET_CONTENT` /
+`OPEN_DOCUMENT`. The SEND / SEND_MULTIPLE filters, Direct Share and shortcuts are unchanged.
+
+The file is taken from the intent data. Before showing the destination sheet, DropFiler
+checks on a background thread that the URI can be opened for reading (missing URI, other
+schemes, revoked grants, missing files, folders and failing providers end with a "cannot
+read this file" toast and a failure notification). The MIME type comes from the intent,
+then `ContentResolver.getType()`, then the name's extension, otherwise
+`application/octet-stream`. Then the file goes through the existing `getFilename` /
+`saveUri` path, so filename sanitisation, duplicate handling, "location select" and the
+result notification are shared with Share. The source is only opened for reading.
+
+Also hardened for both Share and Open with: provider `query()` failures fall back to the
+URI name, and a `SecurityException` while copying is reported as a failed save instead of
+crashing.
+
+### Verification
+
+| Check | Result |
+| --- | --- |
+| `assembleDebug`, `lintDebug` | OK; lint 0 errors, the same 9 pre-existing warnings |
+| APK `aapt2 dump badging` | `package: name='fjm.sh.dropfiler'`, versionCode 37, versionName 6.0.0, minSdk 21, **targetSdk 28**, label DropFiler |
+| Merged manifest | All components under `fjm.sh.dropfiler.*`; VIEW filter present; SEND filters unchanged |
+| Robolectric | 523 run, 0 failures (2 opt-in screenshot tests skipped) on API 23, 26, 28, 29, 30, 31, 33, 34, 35, 36 (`OpenWithTest` on 23, 28, 29, 34, 36) |
+
+`OpenWithTest` covers implicit `ACTION_VIEW` resolution for `content://` with
+`application/pdf`, `image/jpeg`, `video/mp4`, `application/zip`, `application/octet-stream`,
+`text/plain`, APK and a non-standard type, plus `file://`. It checks that web links and
+EDIT/GET_CONTENT/OPEN_DOCUMENT do not resolve and that SEND still resolves. It also covers
+byte-exact copies (including 6 MB), the destination sheet and its subtitle, cancel, missing
+MIME type / extension / display name, repeated invocations with duplicate handling, and
+failures (null URI, revoked grant, missing file, failing provider, folder, explicit web URL).
+
+**Not tested on a device or emulator** (no KVM in the build environment): the real
+"Open with" dialogs of file managers (including the system Files app), real URI grant
+behaviour, and coexistence with an installed Phone Saver.

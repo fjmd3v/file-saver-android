@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources [
-	<!ENTITY appname "Phone Saver">
+	<!ENTITY appname "DropFiler">
 	<!ENTITY author "Michael Standen">
 	]>
 
@@ -13,7 +13,7 @@
 
 	<!-- Folder list -->
 
-	<string name="folder_list_empty_title">Phone Saver へようこそ!</string>
+	<string name="folder_list_empty_title">&appname; へようこそ!</string>
 	<string name="folder_list_empty_body">下のボタンで保存する場所を追加してください。</string>
 
 	<!-- Folder select -->
@@ -30,23 +30,22 @@
 	<!-- Debug / Error -->
 	<string name="not_supported_content_type">サポートしていないコンテンツタイプ</string>
 	<string name="not_supported" tools:keep="@string/not_supported">このコンテンツタイプの &lt;a href="%1$s">機能リクエスト&lt;/a>
-		をすると、&author; がサポートできます。</string>
+		をすると、正式なサポートを追加できます。</string>
 
 	<!-- Credits -->
 	<string name="credits_version">v%1$s</string>
 	<string name="title_activity_credits">&appname; について</string>
 	<string name="logo_description">ロゴ</string>
-	<string name="credits_creator">by <a href="https://michael.standen.link">&author;</a></string>
-	<string name="credits_content1">Phone Saver は共有機能を通じてファイルを電話に保存する
-		シンプルなアプリケーションです。
-	</string>
-	<string name="credits_content2"><a href="https://github.com/ScreamingHawk/phone-saver">Github</a>
-		で、ソースコードの参照、バグの記録、機能のリクエストができます。
-	</string>
+	<string name="credits_creator"><a href="https://michael.standen.link">&author;</a> による Phone Saver をベースにしています</string>
+	<string name="credits_content1">&appname; は共有機能または「アプリで開く」を通じてファイルのコピーを電話に保存する
+		シンプルなアプリケーションです。</string>
+	<string name="credits_content2">&appname; は、&author; (ScreamingHawk) が開発した Phone Saver を別ブランドとしてフォークしたものです。
+		オリジナルのプロジェクトは <a href="https://github.com/ScreamingHawk/phone-saver">github.com/ScreamingHawk/phone-saver</a>
+		で公開されています。オリジナルのコードには引き続き MIT ライセンスが適用されます。</string>
 	<string name="credits_content3">このアプリケーションは完全にオープンソースです。
 		<a href="https://tldrlegal.com/license/mit-license">MIT ライセンス</a> でライセンスされます。
 	</string>
-	<string name="credits_content_translator">この &appname; の翻訳は
+	<string name="credits_content_translator">この Phone Saver の翻訳は
 		<a href="https://github.com/naofum">Naofumi Fukue</a> によって提供されています。
 	</string>
 
@@ -84,7 +83,7 @@
 	<string name="pref_title_about">&appname; について</string>
 	<string name="credits_section_about">情報</string>
 	<string name="credits_section_licenses">オープンソースライセンス</string>
-	<string name="credits_miuix_body">UI コンポーネント: HChenX（<a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a>）。ソース: <a href="https://github.com/fjmd3v/miuix-xml">github.com/fjmd3v/miuix-xml</a></string>
+	<string name="credits_miuix_body">UI コンポーネント: HChenX（<a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a>）。ソース: <a href="https://github.com/fjmsh/miuix-xml">github.com/fjmsh/miuix-xml</a></string>
 	<string name="credits_libraries_title">その他のライブラリ</string>
 	<string name="credits_libraries_body">AndroidX (Apache 2.0)、Gson (Apache 2.0)、ckChangeLog (Apache 2.0)、Kotlin (Apache 2.0)。</string>
 	<string name="dialog_negative">キャンセル</string>
@@ -105,7 +104,8 @@
 	</array>
 
 	<!-- Save result notifications -->
-	<string name="action_github_description">GitHub で fjmd3v を開く</string>
+	<string name="action_github_description">GitHub で fjmsh を開く</string>
+	<string name="toast_open_with_unreadable">&appname; はこのファイルを読み取れません。ファイルを開いたアプリがアクセスを許可していない可能性があります。</string>
 	<string name="toast_no_browser">%1$s を開けるアプリがありません</string>
 	<string name="notification_channel_name">保存結果</string>
 	<string name="notification_channel_description">共有したアイテムが保存されたかどうかを表示します</string>

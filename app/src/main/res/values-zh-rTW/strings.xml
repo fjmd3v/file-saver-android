@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE resources [
-	<!ENTITY appname "Phone Saver">
+	<!ENTITY appname "DropFiler">
 	<!ENTITY author "Michael Standen">
 	]>
 
@@ -14,7 +14,7 @@
 
 	<!-- Folder list -->
 
-	<string name="folder_list_empty_title">歡迎使用 Phone Saver!</string>
+	<string name="folder_list_empty_title">歡迎使用 &appname;!</string>
 	<string name="folder_list_empty_body">請使用下面的按鈕加入儲存位置。</string>
 
 	<string name="location_select_label">* 選擇位置 *</string>
@@ -38,8 +38,8 @@
 
 	<!-- Debug / Error -->
 	<string name="not_supported_content_type">不支援的內容類型</string>
-	<string name="not_supported">請&lt;a href="%1$s">提出這個內容類型的功能請求&lt;/a>，讓
-		&author; 能夠加入正式的支援。&lt;br/>&lt;br/>您也可以啟用「強制儲存」設定來強制
+	<string name="not_supported">請&lt;a href="%1$s">提出這個內容類型的功能請求&lt;/a>，以便
+		加入正式的支援。&lt;br/>&lt;br/>您也可以啟用「強制儲存」設定來強制
 		&appname; 無論如何都試著儲存。</string>
 
 	<!-- Loading -->
@@ -50,17 +50,16 @@
 	<string name="credits_version">v%1$s</string>
 	<string name="title_activity_credits">關於 &appname;</string>
 	<string name="logo_description">標誌</string>
-	<string name="credits_creator">由 <a href="https://michael.standen.link">&author;</a></string>
-	<string name="credits_content1">Phone Saver 是一個簡單的應用程式，可以透過分享功能
-		儲存檔案到手機中。
-	</string>
-	<string name="credits_content2">您可以在
-		<a href="https://github.com/ScreamingHawk/phone-saver">Github</a> 檢視原始碼、記錄錯誤和要求功能。
-	</string>
+	<string name="credits_creator">基於 <a href="https://michael.standen.link">&author;</a> 的 Phone Saver</string>
+	<string name="credits_content1">&appname; 是一個簡單的應用程式，可以透過分享功能或「以其他應用程式開啟」
+		儲存檔案的副本到手機中。</string>
+	<string name="credits_content2">&appname; 是 Phone Saver 的獨立品牌分支，Phone Saver 最初由 &author; (ScreamingHawk) 開發。
+		原始專案位於 <a href="https://github.com/ScreamingHawk/phone-saver">github.com/ScreamingHawk/phone-saver</a>。
+		原始程式碼仍受其適用的 MIT 授權條款約束。</string>
 	<string name="credits_content3">這個應用程式完全開放原始碼，根據
 		<a href="https://tldrlegal.com/license/mit-license">MIT 許可證</a> 授權。
 	</string>
-	<string name="credits_content_translator">&appname; 的翻譯由
+	<string name="credits_content_translator">Phone Saver 的翻譯由
 		<a href="https://michael.standen.link">&author;</a>提供。
 	</string>
 
@@ -187,7 +186,7 @@
 	<string name="pref_title_about">關於 &appname;</string>
 	<string name="credits_section_about">關於</string>
 	<string name="credits_section_licenses">開放原始碼授權</string>
-	<string name="credits_miuix_body">介面元件由 HChenX 提供，採用 <a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a> 授權。原始碼：<a href="https://github.com/fjmd3v/miuix-xml">github.com/fjmd3v/miuix-xml</a></string>
+	<string name="credits_miuix_body">介面元件由 HChenX 提供，採用 <a href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html">GNU LGPL 2.1</a> 授權。原始碼：<a href="https://github.com/fjmsh/miuix-xml">github.com/fjmsh/miuix-xml</a></string>
 	<string name="credits_libraries_title">其他程式庫</string>
 	<string name="credits_libraries_body">AndroidX (Apache 2.0)、Gson (Apache 2.0)、ckChangeLog (Apache 2.0)、Kotlin (Apache 2.0)。</string>
 	<string name="dialog_negative">取消</string>
@@ -208,7 +207,8 @@
 	</array>
 
 	<!-- Save result notifications -->
-	<string name="action_github_description">在 GitHub 上開啟 fjmd3v</string>
+	<string name="action_github_description">在 GitHub 上開啟 fjmsh</string>
+	<string name="toast_open_with_unreadable">&appname; 無法讀取這個檔案。開啟它的應用程式可能沒有授予存取權限。</string>
 	<string name="toast_no_browser">沒有可開啟 %1$s 的應用程式</string>
 	<string name="notification_channel_name">儲存結果</string>
 	<string name="notification_channel_description">顯示分享的項目是否已儲存</string>
